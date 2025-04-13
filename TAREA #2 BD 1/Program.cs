@@ -1,3 +1,5 @@
+using TAREA__2_BD_1.Services;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -5,6 +7,8 @@ builder.Services.AddControllersWithViews();
 
 // Añadir servicios para la conexión a la base de datos
 builder.Services.AddSingleton<IConfiguration>(builder.Configuration);
+
+builder.Services.AddScoped<DatabaseService>();
 
 var app = builder.Build();
 
