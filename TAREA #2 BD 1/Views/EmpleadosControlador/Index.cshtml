@@ -1,1 +1,48 @@
-﻿@model List<Empleado>
+﻿@model List<TAREA__2_BD_1.Models.Empleado>
+
+@{
+    ViewData["Title"] = "Lista de Empleados";
+    var filtro = ViewBag.Filtro as string ?? "";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<form asp-action="Index" method="get" class="mb-4 row g-3 align-items-center">
+    <div class="col-auto">
+        <input type="text" name="filtro" value="@filtro" class="form-control" placeholder="Buscar por nombre o cédula" />
+    </div>
+    <div class="col-auto">
+        <button type="submit" class="btn btn-primary">Buscar</button>
+    </div>
+</form>
+
+@if (Model != null && Model.Count > 0)
+{
+    <table class="table table-bordered table-striped">
+        <thead class="table-dark">
+            <tr>
+                <th>Documento identidad</th>
+                <th>Nombre</th>
+                <th>ID Puesto</th>
+                <th>Contratacion</th>
+                <th>Saldo Vacaciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var empleado in Model)
+            {
+                <tr>
+                    <td>@empleado.ValorDocumentoIdentidad</td>
+                    <td>@empleado.Nombre</td>
+                    <td>@empleado.IdPuesto</td>
+                    <td>@empleado.FechaContratacion</td>
+                    <td>@empleado.SaldoVacaciones</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <div class="alert alert-info">No se encontraron empleados que coincidan con el filtro.</div>
+}

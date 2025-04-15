@@ -24,13 +24,15 @@ namespace TAREA__2_BD_1.Controllers
         {
             if (ModelState.IsValid)
             {
-                var codigoError = await _databaseService.LoginUsuarioAsync(model.Username, model.Password);
+                var resultado = await _databaseService.LoginUsuarioAsync(model.Username, model.Password);
+                int codigoError = resultado.CodigoError;
+                int? idUsuario = resultado.UserId;
 
                 switch (codigoError)
                 {
                     case 0:
                         // Login exitoso
-                        return RedirectToAction("Index");
+                        return RedirectToAction("Index", new { idUser = idUsuario });
 
                     case 50001:
                         ModelState.AddModelError("", "El nombre de usuario no existe.");
@@ -59,14 +61,11 @@ namespace TAREA__2_BD_1.Controllers
 
 
         // Listar empleados
-        public async Task<IActionResult> Index(string filtro = "")
+        public async Task<IActionResult> Index(string filtro, int idUsuario)
         {
-            /*
-            var empleados = await _databaseService.ListarEmpleadosAsync(filtro);
+            var empleados = await _databaseService.ListarEmpleadosAsync(filtro, idUsuario);
             ViewBag.Filtro = filtro;
             return View(empleados);
-            */
-            return View();
         }
 
         // Insertar empleado

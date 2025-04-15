@@ -2,6 +2,7 @@
 using System.Data;
 using TAREA__2_BD_1.Models;
 using System.Net;
+using System.Net.Sockets;
 
 namespace TAREA__2_BD_1.Services
 {
@@ -15,7 +16,7 @@ namespace TAREA__2_BD_1.Services
             _connectionString = configuration.GetConnectionString("DefaultConnection");
         }
 
-        public async Task<int> LoginUsuarioAsync(string username, string password)
+        public async Task<(int CodigoError, int? UserId)> LoginUsuarioAsync(string username, string password)
         {
             using (var connection = new SqlConnection(_connectionString))
             {
@@ -26,24 +27,39 @@ namespace TAREA__2_BD_1.Services
                     command.Parameters.AddWithValue("@Username", username);
                     command.Parameters.AddWithValue("@Password", password);
 
-                    // Obtener IP del cliente
-                    string hostName = Dns.GetHostName();
-                    string myIP = Dns.GetHostByName(hostName).AddressList[0].ToString();
-                    command.Parameters.AddWithValue("@PostInIP", myIP);
+                    string myIP = "";
+                    var host = Dns.GetHostEntry(Dns.GetHostName());
+                    foreach (var ip in host.AddressList)
+                    {
+                        if (ip.AddressFamily == AddressFamily.InterNetwork)
+                        {
+                            myIP = ip.ToString();
+                            break;
+                        }
+                    }
 
+                    command.Parameters.AddWithValue("@PostInIP", myIP);
                     var codigoErrorParam = new SqlParameter("@CodigoError", SqlDbType.Int)
                     {
                         Direction = ParameterDirection.Output
                     };
+
                     command.Parameters.Add(codigoErrorParam);
+                    var userIdParam = new SqlParameter("@UserId", SqlDbType.Int)
+                    {
+                        Direction = ParameterDirection.Output
+                    };
 
+                    command.Parameters.Add(userIdParam);
                     await command.ExecuteNonQueryAsync();
+                    int codigoError = (int)codigoErrorParam.Value;
+                    int? userId = userIdParam.Value != DBNull.Value ? (int?)userIdParam.Value : null;
 
-                    return (int)codigoErrorParam.Value;
+                    return (codigoError, userId);
                 }
             }
         }
-        public async Task<List<Empleado>> ListarEmpleadosAsync(string filtro = "")
+        public async Task<List<Empleado>> ListarEmpleadosAsync(string filtro, int idUsuario)
         {
             var empleados = new List<Empleado>();
             using (var connection = new SqlConnection(_connectionString))
@@ -53,19 +69,31 @@ namespace TAREA__2_BD_1.Services
                 {
                     command.CommandType = CommandType.StoredProcedure;
                     command.Parameters.AddWithValue("@Filtro", filtro);
+                    command.Parameters.AddWithValue("@IdUsuario", idUsuario);
+
+                    string myIP = "";
+                    var host = Dns.GetHostEntry(Dns.GetHostName());
+                    foreach (var ip in host.AddressList)
+                    {
+                        if (ip.AddressFamily == AddressFamily.InterNetwork)
+                        {
+                            myIP = ip.ToString();
+                            break;
+                        }
+                    }
+                    command.Parameters.AddWithValue("@IP", myIP);
+
                     using (var reader = await command.ExecuteReaderAsync())
                     {
                         while (await reader.ReadAsync())
                         {
                             empleados.Add(new Empleado
                             {
-                                Id = reader.GetInt32("Id"),
                                 ValorDocumentoIdentidad = reader.GetString("ValorDocumentoIdentidad"),
                                 Nombre = reader.GetString("Nombre"),
                                 IdPuesto = reader.GetInt32("IdPuesto"),
                                 FechaContratacion = reader.GetDateTime("FechaContratacion"),
-                                SaldoVacaciones = reader.GetDecimal("SaldoVacaciones"),
-                                EsActivo = reader.GetBoolean("EsActivo")
+                                SaldoVacaciones = reader.GetInt32("SaldoVacaciones")
                             });
                         }
                     }
