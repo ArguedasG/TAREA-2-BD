@@ -15,7 +15,7 @@ namespace TAREA__2_BD_1.Controllers
 
         public IActionResult Index()
         {
-            return View();
+            return RedirectToAction("Login", "EmpleadosControlador");
         }
 
         public IActionResult Privacy()

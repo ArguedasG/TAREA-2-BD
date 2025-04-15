@@ -24,23 +24,49 @@ namespace TAREA__2_BD_1.Controllers
         {
             if (ModelState.IsValid)
             {
-                var loginExitoso = await _databaseService.LoginUsuarioAsync(model.Username, model.Password);
-                if (loginExitoso)
+                var codigoError = await _databaseService.LoginUsuarioAsync(model.Username, model.Password);
+
+                switch (codigoError)
                 {
-                    // Simula autenticación (podemos usar cookies o Identity más adelante)
-                    return RedirectToAction("Index");
+                    case 0:
+                        // Login exitoso
+                        return RedirectToAction("Index");
+
+                    case 50001:
+                        ModelState.AddModelError("", "El nombre de usuario no existe.");
+                        break;
+
+                    case 50002:
+                        ModelState.AddModelError("", "Contraseña incorrecta.");
+                        break;
+
+                    case 50003:
+                        ModelState.AddModelError("", "Demasiados intentos fallidos. Acceso bloqueado temporalmente.");
+                        break;
+
+                    case 50008:
+                        ModelState.AddModelError("", "Error del sistema. Intente más tarde.");
+                        break;
+
+                    default:
+                        ModelState.AddModelError("", "Error desconocido. Código: " + codigoError);
+                        break;
                 }
-                ModelState.AddModelError("", "Usuario o contraseña incorrectos.");
             }
+
             return View(model);
         }
+
 
         // Listar empleados
         public async Task<IActionResult> Index(string filtro = "")
         {
+            /*
             var empleados = await _databaseService.ListarEmpleadosAsync(filtro);
             ViewBag.Filtro = filtro;
             return View(empleados);
+            */
+            return View();
         }
 
         // Insertar empleado

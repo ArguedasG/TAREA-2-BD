@@ -1,6 +1,7 @@
 ﻿using Microsoft.Data.SqlClient;
 using System.Data;
 using TAREA__2_BD_1.Models;
+using System.Net;
 
 namespace TAREA__2_BD_1.Services
 {
@@ -14,18 +15,31 @@ namespace TAREA__2_BD_1.Services
             _connectionString = configuration.GetConnectionString("DefaultConnection");
         }
 
-        public async Task<bool> LoginUsuarioAsync(string username, string password)
+        public async Task<int> LoginUsuarioAsync(string username, string password)
         {
             using (var connection = new SqlConnection(_connectionString))
             {
                 await connection.OpenAsync();
-                using (var command = new SqlCommand("LoginUsuario", connection))
+                using (var command = new SqlCommand("sp_LoginUsuario", connection))
                 {
                     command.CommandType = CommandType.StoredProcedure;
                     command.Parameters.AddWithValue("@Username", username);
                     command.Parameters.AddWithValue("@Password", password);
-                    var result = await command.ExecuteScalarAsync();
-                    return result != null && (int)result == 0; // Asume que 0 indica éxito
+
+                    // Obtener IP del cliente
+                    string hostName = Dns.GetHostName();
+                    string myIP = Dns.GetHostByName(hostName).AddressList[0].ToString();
+                    command.Parameters.AddWithValue("@PostInIP", myIP);
+
+                    var codigoErrorParam = new SqlParameter("@CodigoError", SqlDbType.Int)
+                    {
+                        Direction = ParameterDirection.Output
+                    };
+                    command.Parameters.Add(codigoErrorParam);
+
+                    await command.ExecuteNonQueryAsync();
+
+                    return (int)codigoErrorParam.Value;
                 }
             }
         }
@@ -35,7 +49,7 @@ namespace TAREA__2_BD_1.Services
             using (var connection = new SqlConnection(_connectionString))
             {
                 await connection.OpenAsync();
-                using (var command = new SqlCommand("ListarEmpleados", connection))
+                using (var command = new SqlCommand("sp_ListarEmpleados", connection))
                 {
                     command.CommandType = CommandType.StoredProcedure;
                     command.Parameters.AddWithValue("@Filtro", filtro);
