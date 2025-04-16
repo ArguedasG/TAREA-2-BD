@@ -82,6 +82,12 @@ namespace TAREA__2_BD_1.Services
                         }
                     }
                     command.Parameters.AddWithValue("@IP", myIP);
+                    var codigoErrorParam = new SqlParameter("@ErrorCode", SqlDbType.Int)
+                    {
+                        Direction = ParameterDirection.Output
+                    };
+
+                    command.Parameters.Add(codigoErrorParam);
 
                     using (var reader = await command.ExecuteReaderAsync())
                     {
