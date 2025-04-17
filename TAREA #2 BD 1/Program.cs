@@ -12,9 +12,6 @@ builder.Services.AddScoped<DatabaseService>();
 
 builder.Services.AddSession();
 
-
-
-
 var app = builder.Build();
 
 app.UseSession();
