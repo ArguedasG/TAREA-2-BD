@@ -27,12 +27,15 @@ namespace TAREA__2_BD_1.Controllers
                 var resultado = await _databaseService.LoginUsuarioAsync(model.Username, model.Password);
                 int codigoError = resultado.CodigoError;
                 int? idUsuario = resultado.UserId;
+                Console.WriteLine(codigoError);
+                Console.WriteLine(idUsuario);
 
                 switch (codigoError)
                 {
                     case 0:
                         // Login exitoso
-                        return RedirectToAction("Index", new { idUser = idUsuario });
+                        HttpContext.Session.SetInt32("idUsuario", idUsuario.Value);
+                        return RedirectToAction("Index");
 
                     case 50001:
                         ModelState.AddModelError("", "El nombre de usuario no existe.");
@@ -61,8 +64,10 @@ namespace TAREA__2_BD_1.Controllers
 
 
         // Listar empleados
-        public async Task<IActionResult> Index(string filtro, int idUsuario)
+        public async Task<IActionResult> Index(string filtro)
         {
+            int idUsuario = HttpContext.Session.GetInt32("idUsuario") ?? 0;
+            Console.WriteLine("Index user " + idUsuario);
             var empleados = await _databaseService.ListarEmpleadosAsync(filtro, idUsuario);
             ViewBag.Filtro = filtro;
             return View(empleados);
