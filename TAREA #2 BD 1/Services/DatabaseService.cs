@@ -69,7 +69,6 @@ namespace TAREA__2_BD_1.Services
                 {
                     command.CommandType = CommandType.StoredProcedure;
                     command.Parameters.AddWithValue("@Filtro", filtro);
-                    Console.WriteLine("SP user " + idUsuario);
                     command.Parameters.AddWithValue("@IdUsuario", idUsuario);
 
                     string myIP = "";
