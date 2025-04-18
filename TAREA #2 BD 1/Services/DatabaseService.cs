@@ -37,20 +37,20 @@ namespace TAREA__2_BD_1.Services
                             break;
                         }
                     }
-
                     command.Parameters.AddWithValue("@inPostInIP", myIP);
+
                     var codigoErrorParam = new SqlParameter("@outCodigoError", SqlDbType.Int)
                     {
                         Direction = ParameterDirection.Output
                     };
-
                     command.Parameters.Add(codigoErrorParam);
+
                     var userIdParam = new SqlParameter("@outUserId", SqlDbType.Int)
                     {
                         Direction = ParameterDirection.Output
                     };
-
                     command.Parameters.Add(userIdParam);
+
                     await command.ExecuteNonQueryAsync();
                     int codigoError = (int)codigoErrorParam.Value;
                     int? userId = userIdParam.Value != DBNull.Value ? (int?)userIdParam.Value : null;
@@ -114,12 +114,9 @@ namespace TAREA__2_BD_1.Services
             {
                 await connection.OpenAsync();
 
+                Console.WriteLine("ID Puesto: " + empleado.IdPuesto);
                 Console.WriteLine("Identidad: " + empleado.ValorDocumentoIdentidad);
                 Console.WriteLine("Empleado: " + empleado.Nombre);
-                Console.WriteLine("Puesto: " + empleado.IdPuesto);
-                Console.WriteLine("Fecha de Contratación: " + empleado.FechaContratacion);
-                Console.WriteLine("Saldo de Vacaciones: " + empleado.SaldoVacaciones);
-                Console.WriteLine("Es Activo: " + empleado.EsActivo);
 
                 using (var command = new SqlCommand("sp_InsertarEmpleado", connection))
                 {
@@ -127,7 +124,6 @@ namespace TAREA__2_BD_1.Services
                     command.Parameters.AddWithValue("@inPuestoId", empleado.IdPuesto);
                     command.Parameters.AddWithValue("@inValorDocumentoIdentidad", empleado.ValorDocumentoIdentidad);
                     command.Parameters.AddWithValue("@inNombre", empleado.Nombre);
-                    command.Parameters.AddWithValue("@inFechaContratacion", empleado.FechaContratacion);
                     command.Parameters.AddWithValue("@inUserId", idUsuario);
 
                     string myIP = "";
@@ -144,7 +140,7 @@ namespace TAREA__2_BD_1.Services
 
                     var codigoError = new SqlParameter("@outCodigoError", SqlDbType.Int)
                     {
-                        Direction = ParameterDirection.ReturnValue
+                        Direction = ParameterDirection.Output
                     };
                     command.Parameters.Add(codigoError);
 
