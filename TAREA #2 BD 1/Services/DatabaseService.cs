@@ -134,7 +134,7 @@ namespace TAREA__2_BD_1.Services
         }
 
 
-        public async Task<List<Puesto>> ObtenerPuestosAsync()
+        public async Task<List<Puesto>> ObtenerPuestosAsync(int idUsuario)
         {
             var puestos = new List<Puesto>();
 
@@ -146,6 +146,7 @@ namespace TAREA__2_BD_1.Services
                     using (var command = new SqlCommand("sp_ObtenerPuestos", connection))
                     {
                         command.CommandType = CommandType.StoredProcedure;
+                        command.Parameters.AddWithValue("@inIdUsuario", idUsuario);
 
                         var outResultCodeParam = new SqlParameter("@outResultCode", SqlDbType.Int)
                         {

@@ -75,7 +75,8 @@ namespace TAREA__2_BD_1.Controllers
         {
             try
             {
-                var puestos = await _databaseService.ObtenerPuestosAsync();
+                int idUsuario = HttpContext.Session.GetInt32("idUsuario") ?? 0;
+                var puestos = await _databaseService.ObtenerPuestosAsync(idUsuario);
                 ViewBag.Puestos = puestos ?? new List<Puesto>(); // Asegura que no sea null
             }
             catch (Exception ex)
@@ -84,7 +85,7 @@ namespace TAREA__2_BD_1.Controllers
                 ViewBag.Puestos = new List<Puesto>();
                 ModelState.AddModelError("", "Error al obtener los puestos. Intente más tarde.");
             }
-            return View();
+            return View(new Empleado());
         }
 
         [HttpPost]
@@ -99,7 +100,8 @@ namespace TAREA__2_BD_1.Controllers
                 }
                 ModelState.AddModelError("", $"Error al insertar empleado: Código {codigoError}");
             }
-            ViewBag.Puestos = await _databaseService.ObtenerPuestosAsync();
+            int idUsuario = HttpContext.Session.GetInt32("idUsuario") ?? 0;
+            ViewBag.Puestos = await _databaseService.ObtenerPuestosAsync(idUsuario);
             return View(empleado);
         }
     }

@@ -2,7 +2,7 @@
 
 @{
     ViewData["Title"] = "Insertar Empleado";
-    var puestos = ViewBag.Puestos as List<string> ?? new List<string>();
+    var puestos = ViewBag.Puestos as List<TAREA__2_BD_1.Models.Puesto>;
 }
 
 <h2>@ViewData["Title"]</h2>
@@ -26,11 +26,14 @@
             </div>
             <div class="mb-3">
                 <label for="IdPuesto" class="form-label">Puesto</label>
-                <select class="form-select" id="IdPuesto" name="IdPuesto" required>
+                <select asp-for="IdPuesto" class="form-control">
                     <option value="">Seleccione un puesto</option>
-                    @foreach (var puesto in puestos.OrderBy(p => p))
+                    @if (puestos != null)
                     {
-                        <option value="@puesto" selected="@(puesto == Model.IdPuesto.ToString() ? "selected" : null)">@puesto</option>
+                        foreach (var puesto in puestos)
+                        {
+                            <option value="@puesto.Id">@puesto.Nombre</option>
+                        }
                     }
                 </select>
                 <div class="invalid-feedback">
