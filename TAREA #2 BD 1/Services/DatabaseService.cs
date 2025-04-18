@@ -24,8 +24,8 @@ namespace TAREA__2_BD_1.Services
                 using (var command = new SqlCommand("sp_LoginUsuario", connection))
                 {
                     command.CommandType = CommandType.StoredProcedure;
-                    command.Parameters.AddWithValue("@Username", username);
-                    command.Parameters.AddWithValue("@Password", password);
+                    command.Parameters.AddWithValue("@inUsername", username);
+                    command.Parameters.AddWithValue("@inPassword", password);
 
                     string myIP = "";
                     var host = Dns.GetHostEntry(Dns.GetHostName());
@@ -38,14 +38,14 @@ namespace TAREA__2_BD_1.Services
                         }
                     }
 
-                    command.Parameters.AddWithValue("@PostInIP", myIP);
-                    var codigoErrorParam = new SqlParameter("@CodigoError", SqlDbType.Int)
+                    command.Parameters.AddWithValue("@inPostInIP", myIP);
+                    var codigoErrorParam = new SqlParameter("@outCodigoError", SqlDbType.Int)
                     {
                         Direction = ParameterDirection.Output
                     };
 
                     command.Parameters.Add(codigoErrorParam);
-                    var userIdParam = new SqlParameter("@UserId", SqlDbType.Int)
+                    var userIdParam = new SqlParameter("@outUserId", SqlDbType.Int)
                     {
                         Direction = ParameterDirection.Output
                     };
@@ -68,8 +68,8 @@ namespace TAREA__2_BD_1.Services
                 using (var command = new SqlCommand("sp_ListarEmpleados", connection))
                 {
                     command.CommandType = CommandType.StoredProcedure;
-                    command.Parameters.AddWithValue("@Filtro", filtro);
-                    command.Parameters.AddWithValue("@IdUsuario", idUsuario);
+                    command.Parameters.AddWithValue("@inFiltro", filtro);
+                    command.Parameters.AddWithValue("@inUserId", idUsuario);
 
                     string myIP = "";
                     var host = Dns.GetHostEntry(Dns.GetHostName());
@@ -81,13 +81,13 @@ namespace TAREA__2_BD_1.Services
                             break;
                         }
                     }
-                    command.Parameters.AddWithValue("@IP", myIP);
-                    var codigoErrorParam = new SqlParameter("@ErrorCode", SqlDbType.Int)
+                    command.Parameters.AddWithValue("@inPostInIP", myIP);
+                    var codigoError = new SqlParameter("@outCodigoError", SqlDbType.Int)
                     {
                         Direction = ParameterDirection.Output
                     };
 
-                    command.Parameters.Add(codigoErrorParam);
+                    command.Parameters.Add(codigoError);
 
                     using (var reader = await command.ExecuteReaderAsync())
                     {
@@ -108,27 +108,48 @@ namespace TAREA__2_BD_1.Services
             return empleados;
         }
 
-        public async Task<int> InsertarEmpleadoAsync(Empleado empleado)
+        public async Task<int> InsertarEmpleadoAsync(Empleado empleado, int idUsuario)
         {
             using (var connection = new SqlConnection(_connectionString))
             {
                 await connection.OpenAsync();
-                using (var command = new SqlCommand("InsertarEmpleado", connection))
+
+                Console.WriteLine("Identidad: " + empleado.ValorDocumentoIdentidad);
+                Console.WriteLine("Empleado: " + empleado.Nombre);
+                Console.WriteLine("Puesto: " + empleado.IdPuesto);
+                Console.WriteLine("Fecha de Contratación: " + empleado.FechaContratacion);
+                Console.WriteLine("Saldo de Vacaciones: " + empleado.SaldoVacaciones);
+                Console.WriteLine("Es Activo: " + empleado.EsActivo);
+
+                using (var command = new SqlCommand("sp_InsertarEmpleado", connection))
                 {
                     command.CommandType = CommandType.StoredProcedure;
-                    command.Parameters.AddWithValue("@ValorDocumentoIdentidad", empleado.ValorDocumentoIdentidad);
-                    command.Parameters.AddWithValue("@Nombre", empleado.Nombre);
-                    command.Parameters.AddWithValue("@IdPuesto", empleado.IdPuesto);
-                    command.Parameters.AddWithValue("@FechaContratacion", empleado.FechaContratacion);
-                    command.Parameters.AddWithValue("@SaldoVacaciones", empleado.SaldoVacaciones);
-                    command.Parameters.AddWithValue("@EsActivo", empleado.EsActivo);
-                    var returnValue = new SqlParameter("@ReturnVal", SqlDbType.Int)
+                    command.Parameters.AddWithValue("@inPuestoId", empleado.IdPuesto);
+                    command.Parameters.AddWithValue("@inValorDocumentoIdentidad", empleado.ValorDocumentoIdentidad);
+                    command.Parameters.AddWithValue("@inNombre", empleado.Nombre);
+                    command.Parameters.AddWithValue("@inFechaContratacion", empleado.FechaContratacion);
+                    command.Parameters.AddWithValue("@inUserId", idUsuario);
+
+                    string myIP = "";
+                    var host = Dns.GetHostEntry(Dns.GetHostName());
+                    foreach (var ip in host.AddressList)
+                    {
+                        if (ip.AddressFamily == AddressFamily.InterNetwork)
+                        {
+                            myIP = ip.ToString();
+                            break;
+                        }
+                    }
+                    command.Parameters.AddWithValue("@inPostInIP", myIP);
+
+                    var codigoError = new SqlParameter("@outCodigoError", SqlDbType.Int)
                     {
                         Direction = ParameterDirection.ReturnValue
                     };
-                    command.Parameters.Add(returnValue);
+                    command.Parameters.Add(codigoError);
+
                     await command.ExecuteNonQueryAsync();
-                    return (int)returnValue.Value; // Código de error (0 si es éxito)
+                    return (int)codigoError.Value; // Código de error (0 si es éxito)
                 }
             }
         }
@@ -146,9 +167,21 @@ namespace TAREA__2_BD_1.Services
                     using (var command = new SqlCommand("sp_ObtenerPuestos", connection))
                     {
                         command.CommandType = CommandType.StoredProcedure;
-                        command.Parameters.AddWithValue("@inIdUsuario", idUsuario);
+                        command.Parameters.AddWithValue("@inUserId", idUsuario);
 
-                        var outResultCodeParam = new SqlParameter("@outResultCode", SqlDbType.Int)
+                        string myIP = "";
+                        var host = Dns.GetHostEntry(Dns.GetHostName());
+                        foreach (var ip in host.AddressList)
+                        {
+                            if (ip.AddressFamily == AddressFamily.InterNetwork)
+                            {
+                                myIP = ip.ToString();
+                                break;
+                            }
+                        }
+                        command.Parameters.AddWithValue("@inPostInIP", myIP);
+
+                        var outResultCodeParam = new SqlParameter("@outCodigoError", SqlDbType.Int)
                         {
                             Direction = ParameterDirection.Output
                         };
@@ -167,10 +200,10 @@ namespace TAREA__2_BD_1.Services
                             }
                         }
 
-                        int resultCode = (int)outResultCodeParam.Value;
-                        if (resultCode != 0)
+                        int codigoError = (int)outResultCodeParam.Value;
+                        if (codigoError != 0)
                         {
-                            throw new Exception($"Error en sp_ObtenerPuestos. Código de error: {resultCode}");
+                            throw new Exception($"Error en sp_ObtenerPuestos. Código de error: {codigoError}");
                         }
                     }
                 }
@@ -197,8 +230,8 @@ namespace TAREA__2_BD_1.Services
                     command.Parameters.AddWithValue("@inIdEmpleado", empleado.Id);
                     command.Parameters.AddWithValue("@inValorDocumentoIdentidad", empleado.ValorDocumentoIdentidad);
                     command.Parameters.AddWithValue("@inNombre", empleado.Nombre);
-                    command.Parameters.AddWithValue("@inIdPuesto", empleado.IdPuesto);
-                    command.Parameters.AddWithValue("@inIdPostByUser", idUsuario);
+                    command.Parameters.AddWithValue("@inPuestoId", empleado.IdPuesto);
+                    command.Parameters.AddWithValue("@inUserId", idUsuario);
 
                     // Obtener la IP del cliente
                     string myIP = "";
@@ -213,21 +246,18 @@ namespace TAREA__2_BD_1.Services
                     }
                     command.Parameters.AddWithValue("@inPostInIP", myIP);
 
-                    // Agregar la hora actual
-                    command.Parameters.AddWithValue("@inPostTime", DateTime.Now);
-
                     // Parámetro de salida
-                    var resultCodeParam = new SqlParameter("@outResultCode", SqlDbType.Int)
+                    var codigoError = new SqlParameter("@outCodigoError", SqlDbType.Int)
                     {
                         Direction = ParameterDirection.Output
                     };
-                    command.Parameters.Add(resultCodeParam);
+                    command.Parameters.Add(codigoError);
 
                     // Ejecutar el procedimiento almacenado
                     await command.ExecuteNonQueryAsync();
 
                     // Retornar el código de resultado
-                    return (int)resultCodeParam.Value;
+                    return (int)codigoError.Value;
                 }
             }
         }

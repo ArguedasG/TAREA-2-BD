@@ -91,16 +91,16 @@ namespace TAREA__2_BD_1.Controllers
         [HttpPost]
         public async Task<IActionResult> Crear(Empleado empleado)
         {
+            int idUsuario = HttpContext.Session.GetInt32("idUsuario") ?? 0;
             if (ModelState.IsValid)
             {
-                var codigoError = await _databaseService.InsertarEmpleadoAsync(empleado);
+                var codigoError = await _databaseService.InsertarEmpleadoAsync(empleado, idUsuario);
                 if (codigoError == 0)
                 {
                     return RedirectToAction("Index");
                 }
                 ModelState.AddModelError("", $"Error al insertar empleado: Código {codigoError}");
             }
-            int idUsuario = HttpContext.Session.GetInt32("idUsuario") ?? 0;
             ViewBag.Puestos = await _databaseService.ObtenerPuestosAsync(idUsuario);
             return View(empleado);
         }
