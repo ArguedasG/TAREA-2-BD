@@ -73,7 +73,17 @@ namespace TAREA__2_BD_1.Controllers
         // Insertar empleado
         public async Task<IActionResult> Crear()
         {
-            ViewBag.Puestos = await _databaseService.ObtenerPuestosAsync();
+            try
+            {
+                var puestos = await _databaseService.ObtenerPuestosAsync();
+                ViewBag.Puestos = puestos ?? new List<Puesto>(); // Asegura que no sea null
+            }
+            catch (Exception ex)
+            {
+                // Manejo de errores
+                ViewBag.Puestos = new List<Puesto>();
+                ModelState.AddModelError("", "Error al obtener los puestos. Intente más tarde.");
+            }
             return View();
         }
 

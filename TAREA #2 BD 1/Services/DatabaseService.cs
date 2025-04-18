@@ -134,29 +134,52 @@ namespace TAREA__2_BD_1.Services
         }
 
 
-        //EDITAR ESTE MÉTODO PARA ELIMINAR EL SQL INCRUSTADO (FALTA EL STORED PROCEDURE)
         public async Task<List<Puesto>> ObtenerPuestosAsync()
         {
             var puestos = new List<Puesto>();
-            using (var connection = new SqlConnection(_connectionString))
+
+            try
             {
-                await connection.OpenAsync();
-                using (var command = new SqlCommand("SELECT Id, Nombre, SalarioxHora FROM Puesto ORDER BY Nombre", connection))
+                using (var connection = new SqlConnection(_connectionString))
                 {
-                    using (var reader = await command.ExecuteReaderAsync())
+                    await connection.OpenAsync();
+                    using (var command = new SqlCommand("sp_ObtenerPuestos", connection))
                     {
-                        while (await reader.ReadAsync())
+                        command.CommandType = CommandType.StoredProcedure;
+
+                        var outResultCodeParam = new SqlParameter("@outResultCode", SqlDbType.Int)
                         {
-                            puestos.Add(new Puesto
+                            Direction = ParameterDirection.Output
+                        };
+                        command.Parameters.Add(outResultCodeParam);
+
+                        using (var reader = await command.ExecuteReaderAsync())
+                        {
+                            while (await reader.ReadAsync())
                             {
-                                Id = reader.GetInt32("Id"),
-                                Nombre = reader.GetString("Nombre"),
-                                SalarioxHora = reader.GetDecimal("SalarioxHora")
-                            });
+                                puestos.Add(new Puesto
+                                {
+                                    Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                                    Nombre = reader.GetString(reader.GetOrdinal("Nombre")),
+                                    SalarioxHora = reader.GetDecimal(reader.GetOrdinal("SalarioxHora"))
+                                });
+                            }
+                        }
+
+                        int resultCode = (int)outResultCodeParam.Value;
+                        if (resultCode != 0)
+                        {
+                            throw new Exception($"Error en sp_ObtenerPuestos. Código de error: {resultCode}");
                         }
                     }
                 }
             }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"Error al obtener los puestos: {ex.Message}");
+                Console.Error.WriteLine(ex.StackTrace);
+            }
+
             return puestos;
         }
 

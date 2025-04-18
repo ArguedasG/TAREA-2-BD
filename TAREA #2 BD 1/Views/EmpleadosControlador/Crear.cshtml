@@ -1,0 +1,63 @@
+﻿@model TAREA__2_BD_1.Models.Empleado
+
+@{
+    ViewData["Title"] = "Insertar Empleado";
+    var puestos = ViewBag.Puestos as List<string> ?? new List<string>();
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<div class="card">
+    <div class="card-body">
+        <form asp-action="Crear" method="post" class="needs-validation" novalidate>
+            <div class="mb-3">
+                <label for="ValorDocumentoIdentidad" class="form-label">Documento de Identidad</label>
+                <input type="text" class="form-control" id="ValorDocumentoIdentidad" name="ValorDocumentoIdentidad" value="@Model.ValorDocumentoIdentidad" required pattern="\d+">
+                <div class="invalid-feedback">
+                    El documento de identidad debe ser numérico.
+                </div>
+            </div>
+            <div class="mb-3">
+                <label for="Nombre" class="form-label">Nombre</label>
+                <input type="text" class="form-control" id="Nombre" name="Nombre" value="@Model.Nombre" required pattern="[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+">
+                <div class="invalid-feedback">
+                    El nombre debe contener solo letras y espacios.
+                </div>
+            </div>
+            <div class="mb-3">
+                <label for="IdPuesto" class="form-label">Puesto</label>
+                <select class="form-select" id="IdPuesto" name="IdPuesto" required>
+                    <option value="">Seleccione un puesto</option>
+                    @foreach (var puesto in puestos.OrderBy(p => p))
+                    {
+                        <option value="@puesto" selected="@(puesto == Model.IdPuesto.ToString() ? "selected" : null)">@puesto</option>
+                    }
+                </select>
+                <div class="invalid-feedback">
+                    Debe seleccionar un puesto.
+                </div>
+            </div>
+            <button type="submit" class="btn btn-primary">Guardar</button>
+            <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Habilitar validación de Bootstrap
+        (function () {
+            'use strict';
+            var forms = document.querySelectorAll('.needs-validation');
+            Array.prototype.slice.call(forms).forEach(function (form) {
+                form.addEventListener('submit', function (event) {
+                    if (!form.checkValidity()) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                    }
+                    form.classList.add('was-validated');
+                }, false);
+            });
+        })();
+    </script>
+}
