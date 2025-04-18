@@ -114,10 +114,6 @@ namespace TAREA__2_BD_1.Services
             {
                 await connection.OpenAsync();
 
-                Console.WriteLine("ID Puesto: " + empleado.IdPuesto);
-                Console.WriteLine("Identidad: " + empleado.ValorDocumentoIdentidad);
-                Console.WriteLine("Empleado: " + empleado.Nombre);
-
                 using (var command = new SqlCommand("sp_InsertarEmpleado", connection))
                 {
                     command.CommandType = CommandType.StoredProcedure;
