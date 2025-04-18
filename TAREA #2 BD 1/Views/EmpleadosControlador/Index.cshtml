@@ -13,10 +13,15 @@
             <input type="text" name="filtro" value="@filtro" class="form-control" placeholder="Buscar por nombre o cédula" />
         </div>
         <div class="col-auto">
-            <button type="submit" class="btn btn-primary">Buscar</button>
+            <button type="submit" class="btn btn-outline-dark">Buscar</button>
         </div>
     </form>
     <a asp-action="Crear" class="btn btn-success">Insertar Nuevo Empleado</a>
+    <a asp-action="Actualizar" class="btn btn-primary">Actualizar Empleado</a>
+    <a asp-action="Eliminar" class="btn btn-danger">Eliminar Empleado</a>
+    <a asp-action="Consultar" class="btn btn-info">Consultar Empleado</a>
+    <a asp-action="Movimientos" class="btn btn-warning">Movimientos</a>
+
 </div>
 
 @if (Model != null && Model.Count > 0)
