@@ -133,6 +133,8 @@ namespace TAREA__2_BD_1.Services
             }
         }
 
+
+        //EDITAR ESTE MÉTODO PARA ELIMINAR EL SQL INCRUSTADO (FALTA EL STORED PROCEDURE)
         public async Task<List<Puesto>> ObtenerPuestosAsync()
         {
             var puestos = new List<Puesto>();
@@ -156,6 +158,54 @@ namespace TAREA__2_BD_1.Services
                 }
             }
             return puestos;
+        }
+
+        public async Task<int> ActualizarEmpleadoAsync(Empleado empleado, int idUsuario)
+        {
+            using (var connection = new SqlConnection(_connectionString))
+            {
+                await connection.OpenAsync();
+                using (var command = new SqlCommand("sp_UpdateEmpleado", connection))
+                {
+                    command.CommandType = CommandType.StoredProcedure;
+
+                    // Parámetros de entrada
+                    command.Parameters.AddWithValue("@inIdEmpleado", empleado.Id);
+                    command.Parameters.AddWithValue("@inValorDocumentoIdentidad", empleado.ValorDocumentoIdentidad);
+                    command.Parameters.AddWithValue("@inNombre", empleado.Nombre);
+                    command.Parameters.AddWithValue("@inIdPuesto", empleado.IdPuesto);
+                    command.Parameters.AddWithValue("@inIdPostByUser", idUsuario);
+
+                    // Obtener la IP del cliente
+                    string myIP = "";
+                    var host = Dns.GetHostEntry(Dns.GetHostName());
+                    foreach (var ip in host.AddressList)
+                    {
+                        if (ip.AddressFamily == AddressFamily.InterNetwork)
+                        {
+                            myIP = ip.ToString();
+                            break;
+                        }
+                    }
+                    command.Parameters.AddWithValue("@inPostInIP", myIP);
+
+                    // Agregar la hora actual
+                    command.Parameters.AddWithValue("@inPostTime", DateTime.Now);
+
+                    // Parámetro de salida
+                    var resultCodeParam = new SqlParameter("@outResultCode", SqlDbType.Int)
+                    {
+                        Direction = ParameterDirection.Output
+                    };
+                    command.Parameters.Add(resultCodeParam);
+
+                    // Ejecutar el procedimiento almacenado
+                    await command.ExecuteNonQueryAsync();
+
+                    // Retornar el código de resultado
+                    return (int)resultCodeParam.Value;
+                }
+            }
         }
     }
 }
