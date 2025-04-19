@@ -21,14 +21,30 @@
         <form asp-action="Crear" method="post" class="needs-validation" novalidate>
             <div class="mb-3">
                 <label for="ValorDocumentoIdentidad" class="form-label">Documento de Identidad</label>
-                <input type="text" class="form-control" id="ValorDocumentoIdentidad" name="ValorDocumentoIdentidad" value="@Model.ValorDocumentoIdentidad" required pattern="\d+">
+                <input type="text"
+                       class="form-control"
+                       id="ValorDocumentoIdentidad"
+                       name="ValorDocumentoIdentidad"
+                       value="@Model.ValorDocumentoIdentidad"
+                       required
+                       pattern="\d+"
+                       inputmode="numeric"
+                       title="Ingrese solo números">
                 <div class="invalid-feedback">
                     El documento de identidad debe ser numérico.
                 </div>
             </div>
             <div class="mb-3">
                 <label for="Nombre" class="form-label">Nombre</label>
-                <input type="text" class="form-control" id="Nombre" name="Nombre" value="@Model.Nombre" required pattern="[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+">
+                <input type="text"
+                       class="form-control"
+                       id="Nombre"
+                       name="Nombre"
+                       value="@Model.Nombre"
+                       required
+                       pattern="[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+"
+                       inputmode="text"
+                       title="Ingrese solo letras y espacios">
                 <div class="invalid-feedback">
                     El nombre debe contener solo letras y espacios.
                 </div>

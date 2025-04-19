@@ -17,6 +17,7 @@
         </div>
     </form>
     <a asp-action="Crear" class="btn btn-success">Insertar Nuevo Empleado</a>
+    <a asp-action="Movimientos" class="btn btn-warning">Movimientos</a>
 </div>
 
 @if (Model != null && Model.Count > 0)
@@ -43,8 +44,8 @@
                     <td>@empleado.SaldoVacaciones</td>
                     <td>
                         <a asp-action="Editar" asp-route-id="@empleado.Id" class="btn btn-primary btn-sm">Actualizar</a>
-                        <button class="btn btn-danger btn-sm" disabled>Eliminar</button>
-                        <button class="btn btn-info btn-sm" disabled>Consulta</button>
+                        <a asp-action="Eliminar" asp-route-id="@empleado.Id" class="btn btn-danger btn-sm">Eliminar</a>
+                        <a asp-action="Consulta" asp-route-id="@empleado.Id" class="btn btn-info btn-sm">Consulta</a>
                     </td>
                 </tr>
             }

@@ -95,6 +95,7 @@ namespace TAREA__2_BD_1.Services
                         {
                             empleados.Add(new Empleado
                             {
+                                Id = reader.GetInt32(reader.GetOrdinal("Id")),
                                 ValorDocumentoIdentidad = reader.GetString("ValorDocumentoIdentidad"),
                                 Nombre = reader.GetString("Nombre"),
                                 IdPuesto = reader.GetInt32("IdPuesto"),
@@ -211,6 +212,7 @@ namespace TAREA__2_BD_1.Services
 
         public async Task<int> ActualizarEmpleadoAsync(Empleado empleado, int idUsuario)
         {
+            Console.WriteLine($"Actualizando empleado: Id={empleado.Id}, Nombre={empleado.Nombre}, Documento={empleado.ValorDocumentoIdentidad}, PuestoId={empleado.IdPuesto}");
             try
             {
                 using (var connection = new SqlConnection(_connectionString))
@@ -220,14 +222,12 @@ namespace TAREA__2_BD_1.Services
                     {
                         command.CommandType = CommandType.StoredProcedure;
 
-                        // Parámetros de entrada
                         command.Parameters.AddWithValue("@inEmpleadoId", empleado.Id);
                         command.Parameters.AddWithValue("@inValorDocumentoIdentidad", empleado.ValorDocumentoIdentidad);
                         command.Parameters.AddWithValue("@inNombre", empleado.Nombre);
                         command.Parameters.AddWithValue("@inPuestoId", empleado.IdPuesto);
                         command.Parameters.AddWithValue("@inUserId", idUsuario);
 
-                        // Obtener la IP del cliente
                         string myIP = "";
                         var host = Dns.GetHostEntry(Dns.GetHostName());
                         foreach (var ip in host.AddressList)
@@ -240,17 +240,14 @@ namespace TAREA__2_BD_1.Services
                         }
                         command.Parameters.AddWithValue("@inPostInIP", myIP);
 
-                        // Parámetro de salida
                         var codigoError = new SqlParameter("@outCodigoError", SqlDbType.Int)
                         {
                             Direction = ParameterDirection.Output
                         };
                         command.Parameters.Add(codigoError);
 
-                        // Ejecutar el procedimiento almacenado
                         await command.ExecuteNonQueryAsync();
 
-                        // Retornar el código de resultado
                         return (int)codigoError.Value;
                     }
                 }
@@ -259,7 +256,7 @@ namespace TAREA__2_BD_1.Services
             {
                 Console.Error.WriteLine($"Error de SQL: {ex.Message}");
                 Console.Error.WriteLine($"StackTrace: {ex.StackTrace}");
-                throw; // Re-lanzar la excepción para que el controlador también pueda manejarla
+                throw;
             }
             catch (Exception ex)
             {
