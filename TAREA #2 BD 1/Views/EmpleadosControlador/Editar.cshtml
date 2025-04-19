@@ -1,0 +1,32 @@
+﻿@model TAREA__2_BD_1.Models.Empleado
+
+@{
+    ViewData["Title"] = "Editar Empleado";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<form asp-action="Editar" method="post">
+    <input type="hidden" asp-for="Id" />
+
+    <div class="form-group">
+        <label asp-for="ValorDocumentoIdentidad"></label>
+        <input asp-for="ValorDocumentoIdentidad" class="form-control" />
+        <span asp-validation-for="ValorDocumentoIdentidad" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="Nombre"></label>
+        <input asp-for="Nombre" class="form-control" />
+        <span asp-validation-for="Nombre" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="IdPuesto">Puesto</label>
+        <select asp-for="IdPuesto" class="form-control" asp-items="@(new SelectList(ViewBag.Puestos, "Id", "Nombre"))"></select>
+        <span asp-validation-for="IdPuesto" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Guardar</button>
+    <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
+</form>

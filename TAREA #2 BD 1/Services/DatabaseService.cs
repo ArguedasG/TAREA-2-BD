@@ -211,46 +211,61 @@ namespace TAREA__2_BD_1.Services
 
         public async Task<int> ActualizarEmpleadoAsync(Empleado empleado, int idUsuario)
         {
-            using (var connection = new SqlConnection(_connectionString))
+            try
             {
-                await connection.OpenAsync();
-                using (var command = new SqlCommand("sp_UpdateEmpleado", connection))
+                using (var connection = new SqlConnection(_connectionString))
                 {
-                    command.CommandType = CommandType.StoredProcedure;
-
-                    // Parámetros de entrada
-                    command.Parameters.AddWithValue("@inIdEmpleado", empleado.Id);
-                    command.Parameters.AddWithValue("@inValorDocumentoIdentidad", empleado.ValorDocumentoIdentidad);
-                    command.Parameters.AddWithValue("@inNombre", empleado.Nombre);
-                    command.Parameters.AddWithValue("@inPuestoId", empleado.IdPuesto);
-                    command.Parameters.AddWithValue("@inUserId", idUsuario);
-
-                    // Obtener la IP del cliente
-                    string myIP = "";
-                    var host = Dns.GetHostEntry(Dns.GetHostName());
-                    foreach (var ip in host.AddressList)
+                    await connection.OpenAsync();
+                    using (var command = new SqlCommand("sp_UpdateEmpleado", connection))
                     {
-                        if (ip.AddressFamily == AddressFamily.InterNetwork)
+                        command.CommandType = CommandType.StoredProcedure;
+
+                        // Parámetros de entrada
+                        command.Parameters.AddWithValue("@inEmpleadoId", empleado.Id);
+                        command.Parameters.AddWithValue("@inValorDocumentoIdentidad", empleado.ValorDocumentoIdentidad);
+                        command.Parameters.AddWithValue("@inNombre", empleado.Nombre);
+                        command.Parameters.AddWithValue("@inPuestoId", empleado.IdPuesto);
+                        command.Parameters.AddWithValue("@inUserId", idUsuario);
+
+                        // Obtener la IP del cliente
+                        string myIP = "";
+                        var host = Dns.GetHostEntry(Dns.GetHostName());
+                        foreach (var ip in host.AddressList)
                         {
-                            myIP = ip.ToString();
-                            break;
+                            if (ip.AddressFamily == AddressFamily.InterNetwork)
+                            {
+                                myIP = ip.ToString();
+                                break;
+                            }
                         }
+                        command.Parameters.AddWithValue("@inPostInIP", myIP);
+
+                        // Parámetro de salida
+                        var codigoError = new SqlParameter("@outCodigoError", SqlDbType.Int)
+                        {
+                            Direction = ParameterDirection.Output
+                        };
+                        command.Parameters.Add(codigoError);
+
+                        // Ejecutar el procedimiento almacenado
+                        await command.ExecuteNonQueryAsync();
+
+                        // Retornar el código de resultado
+                        return (int)codigoError.Value;
                     }
-                    command.Parameters.AddWithValue("@inPostInIP", myIP);
-
-                    // Parámetro de salida
-                    var codigoError = new SqlParameter("@outCodigoError", SqlDbType.Int)
-                    {
-                        Direction = ParameterDirection.Output
-                    };
-                    command.Parameters.Add(codigoError);
-
-                    // Ejecutar el procedimiento almacenado
-                    await command.ExecuteNonQueryAsync();
-
-                    // Retornar el código de resultado
-                    return (int)codigoError.Value;
                 }
+            }
+            catch (SqlException ex)
+            {
+                Console.Error.WriteLine($"Error de SQL: {ex.Message}");
+                Console.Error.WriteLine($"StackTrace: {ex.StackTrace}");
+                throw; // Re-lanzar la excepción para que el controlador también pueda manejarla
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"Error general: {ex.Message}");
+                Console.Error.WriteLine($"StackTrace: {ex.StackTrace}");
+                throw;
             }
         }
     }

@@ -105,5 +105,66 @@ namespace TAREA__2_BD_1.Controllers
             ViewBag.Puestos = await _databaseService.ObtenerPuestosAsync(idUsuario);
             return View(empleado);
         }
+
+        // Acción para mostrar el formulario de edición
+        public async Task<IActionResult> Editar(int id)
+        {
+            try
+            {
+                int idUsuario = HttpContext.Session.GetInt32("idUsuario") ?? 0;
+
+                // Obtener el empleado por ID (puedes usar el método ListarEmpleadosAsync con un filtro específico)
+                var empleados = await _databaseService.ListarEmpleadosAsync("", idUsuario);
+                var empleado = empleados.FirstOrDefault(e => e.Id == id);
+
+                if (empleado == null)
+                {
+                    return NotFound("Empleado no encontrado.");
+                }
+
+                // Obtener los puestos para el dropdown
+                var puestos = await _databaseService.ObtenerPuestosAsync(idUsuario);
+                ViewBag.Puestos = puestos ?? new List<Puesto>();
+
+                return View(empleado);
+            }
+            catch (Exception ex)
+            {
+                ModelState.AddModelError("", "Error al cargar los datos del empleado. Intente más tarde.");
+                return RedirectToAction("Index");
+            }
+        }
+
+        // Acción para procesar la actualización
+        [HttpPost]
+        public async Task<IActionResult> Editar(Empleado empleado)
+        {
+            int idUsuario = HttpContext.Session.GetInt32("idUsuario") ?? 0;
+
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    Console.WriteLine($"Actualizando empleado: Id={empleado.Id}, Nombre={empleado.Nombre}, Documento={empleado.ValorDocumentoIdentidad}, PuestoId={empleado.IdPuesto}");
+
+                    var codigoError = await _databaseService.ActualizarEmpleadoAsync(empleado, idUsuario);
+
+                    if (codigoError == 0)
+                    {
+                        return RedirectToAction("Index");
+                    }
+
+                    ModelState.AddModelError("", $"Error al actualizar el empleado: Código {codigoError}");
+                }
+                catch (Exception ex)
+                {
+                    ModelState.AddModelError("", "Error al actualizar el empleado. Intente más tarde.");
+                    Console.Error.WriteLine($"Error en Editar: {ex.Message}");
+                }
+            }
+
+            ViewBag.Puestos = await _databaseService.ObtenerPuestosAsync(idUsuario);
+            return View(empleado);
+        }
     }
 }

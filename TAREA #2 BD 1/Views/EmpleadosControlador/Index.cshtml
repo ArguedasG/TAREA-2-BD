@@ -17,10 +17,6 @@
         </div>
     </form>
     <a asp-action="Crear" class="btn btn-success">Insertar Nuevo Empleado</a>
-    <a asp-action="Actualizar" class="btn btn-primary">Actualizar Empleado</a>
-    <a asp-action="Eliminar" class="btn btn-danger">Eliminar Empleado</a>
-    <a asp-action="Consultar" class="btn btn-info">Consultar Empleado</a>
-    <a asp-action="Movimientos" class="btn btn-warning">Movimientos</a>
 </div>
 
 @if (Model != null && Model.Count > 0)
@@ -31,8 +27,9 @@
                 <th>Documento identidad</th>
                 <th>Nombre</th>
                 <th>ID Puesto</th>
-                <th>Contratacion</th>
+                <th>Contratación</th>
                 <th>Saldo Vacaciones</th>
+                <th>Acciones</th>
             </tr>
         </thead>
         <tbody>
@@ -42,8 +39,13 @@
                     <td>@empleado.ValorDocumentoIdentidad</td>
                     <td>@empleado.Nombre</td>
                     <td>@empleado.IdPuesto</td>
-                    <td>@empleado.FechaContratacion</td>
+                    <td>@empleado.FechaContratacion.ToShortDateString()</td>
                     <td>@empleado.SaldoVacaciones</td>
+                    <td>
+                        <a asp-action="Editar" asp-route-id="@empleado.Id" class="btn btn-primary btn-sm">Actualizar</a>
+                        <button class="btn btn-danger btn-sm" disabled>Eliminar</button>
+                        <button class="btn btn-info btn-sm" disabled>Consulta</button>
+                    </td>
                 </tr>
             }
         </tbody>
