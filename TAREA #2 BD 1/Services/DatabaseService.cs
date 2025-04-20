@@ -142,7 +142,7 @@ namespace TAREA__2_BD_1.Services
                     command.Parameters.Add(codigoError);
 
                     await command.ExecuteNonQueryAsync();
-                    return (int)codigoError.Value; // Código de error (0 si es éxito)
+                    return (int)codigoError.Value;
                 }
             }
         }
@@ -151,7 +151,6 @@ namespace TAREA__2_BD_1.Services
         public async Task<List<Puesto>> ObtenerPuestosAsync(int idUsuario)
         {
             var puestos = new List<Puesto>();
-
             try
             {
                 using (var connection = new SqlConnection(_connectionString))
@@ -161,7 +160,6 @@ namespace TAREA__2_BD_1.Services
                     {
                         command.CommandType = CommandType.StoredProcedure;
                         command.Parameters.AddWithValue("@inUserId", idUsuario);
-
                         string myIP = "";
                         var host = Dns.GetHostEntry(Dns.GetHostName());
                         foreach (var ip in host.AddressList)
@@ -173,13 +171,11 @@ namespace TAREA__2_BD_1.Services
                             }
                         }
                         command.Parameters.AddWithValue("@inPostInIP", myIP);
-
                         var outResultCodeParam = new SqlParameter("@outCodigoError", SqlDbType.Int)
                         {
                             Direction = ParameterDirection.Output
                         };
                         command.Parameters.Add(outResultCodeParam);
-
                         using (var reader = await command.ExecuteReaderAsync())
                         {
                             while (await reader.ReadAsync())
@@ -192,7 +188,6 @@ namespace TAREA__2_BD_1.Services
                                 });
                             }
                         }
-
                         int codigoError = (int)outResultCodeParam.Value;
                         if (codigoError != 0)
                         {
@@ -206,13 +201,11 @@ namespace TAREA__2_BD_1.Services
                 Console.Error.WriteLine($"Error al obtener los puestos: {ex.Message}");
                 Console.Error.WriteLine(ex.StackTrace);
             }
-
             return puestos;
         }
 
         public async Task<int> ActualizarEmpleadoAsync(Empleado empleado, int idUsuario)
         {
-            Console.WriteLine($"Actualizando empleado: Id={empleado.Id}, Nombre={empleado.Nombre}, Documento={empleado.ValorDocumentoIdentidad}, PuestoId={empleado.IdPuesto}");
             try
             {
                 using (var connection = new SqlConnection(_connectionString))
@@ -248,6 +241,53 @@ namespace TAREA__2_BD_1.Services
 
                         await command.ExecuteNonQueryAsync();
 
+                        return (int)codigoError.Value;
+                    }
+                }
+            }
+            catch (SqlException ex)
+            {
+                Console.Error.WriteLine($"Error de SQL: {ex.Message}");
+                Console.Error.WriteLine($"StackTrace: {ex.StackTrace}");
+                throw;
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"Error general: {ex.Message}");
+                Console.Error.WriteLine($"StackTrace: {ex.StackTrace}");
+                throw;
+            }
+        }
+        public async Task<int> EliminarEmpleadoAsync(Empleado empleado, int idUsuario)
+        {
+            try
+            {
+                using (var connection = new SqlConnection(_connectionString))
+                {
+                    await connection.OpenAsync();
+                    using (var command = new SqlCommand("sp_DeleteEmpleado", connection))
+                    {
+                        command.CommandType = CommandType.StoredProcedure;
+                        command.Parameters.AddWithValue("@inIdEmpleado", empleado.Id);
+                        command.Parameters.AddWithValue("@inUserId", idUsuario);
+                        string myIP = "";
+                        var host = Dns.GetHostEntry(Dns.GetHostName());
+                        foreach (var ip in host.AddressList)
+                        {
+                            if (ip.AddressFamily == AddressFamily.InterNetwork)
+                            {
+                                myIP = ip.ToString();
+                                break;
+                            }
+                        }
+                        command.Parameters.AddWithValue("@inPostInIP", myIP);
+                        var codigoError = new SqlParameter("@outCodigoError", SqlDbType.Int)
+                        {
+                            Direction = ParameterDirection.Output
+                        };
+                        command.Parameters.Add(codigoError);
+                        await command.ExecuteNonQueryAsync();
+                        Console.WriteLine($"Código de error: {codigoError.Value}");
                         return (int)codigoError.Value;
                     }
                 }

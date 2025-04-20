@@ -1,0 +1,31 @@
+﻿@model TAREA__2_BD_1.Models.Empleado
+
+@{
+    ViewData["Title"] = "Confirmar Eliminación";
+}
+
+<h2>¿Estás seguro de que deseas eliminar este empleado?</h2>
+
+<div class="card mt-4">
+    <div class="card-body">
+        <dl class="row">
+            <dt class="col-sm-3">Nombre</dt>
+            <dd class="col-sm-9">@Model.Nombre</dd>
+
+            <dt class="col-sm-3">Documento Identidad</dt>
+            <dd class="col-sm-9">@Model.ValorDocumentoIdentidad</dd>
+
+            <dt class="col-sm-3">ID Puesto</dt>
+            <dd class="col-sm-9">@Model.IdPuesto</dd>
+
+            <dt class="col-sm-3">Contratación</dt>
+            <dd class="col-sm-9">@Model.FechaContratacion.ToShortDateString()</dd>
+        </dl>
+
+        <form asp-action="EliminarConfirmado" method="post">
+            <input type="hidden" name="id" value="@Model.Id" />
+            <button type="submit" class="btn btn-danger">Eliminar</button>
+            <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
+        </form>
+    </div>
+</div>

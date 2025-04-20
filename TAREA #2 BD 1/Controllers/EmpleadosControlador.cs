@@ -13,12 +13,13 @@ namespace TAREA__2_BD_1.Controllers
             _databaseService = databaseService;
         }
 
-        // Login
+        // Acción para mostrar el formulario de inicio de sesión
         public IActionResult Login()
         {
             return View();
         }
 
+        // Acción para procesar el inicio de sesión
         [HttpPost]
         public async Task<IActionResult> Login(UsuarioLogin model)
         {
@@ -31,7 +32,6 @@ namespace TAREA__2_BD_1.Controllers
                 switch (codigoError)
                 {
                     case 0:
-                        // Login exitoso
                         HttpContext.Session.SetInt32("idUsuario", idUsuario.Value);
                         return RedirectToAction("Index");
 
@@ -56,12 +56,11 @@ namespace TAREA__2_BD_1.Controllers
                         break;
                 }
             }
-
             return View(model);
         }
 
 
-        // Listar empleados
+        // Acción para mostrar la lista de empleados
         public async Task<IActionResult> Index(string filtro)
         {
             int idUsuario = HttpContext.Session.GetInt32("idUsuario") ?? 0;
@@ -70,24 +69,24 @@ namespace TAREA__2_BD_1.Controllers
             return View(empleados);
         }
 
-        // Insertar empleado
+        // Acción para mostrar el formulario de creación
         public async Task<IActionResult> Crear()
         {
             try
             {
                 int idUsuario = HttpContext.Session.GetInt32("idUsuario") ?? 0;
                 var puestos = await _databaseService.ObtenerPuestosAsync(idUsuario);
-                ViewBag.Puestos = puestos ?? new List<Puesto>(); // Asegura que no sea null
+                ViewBag.Puestos = puestos ?? new List<Puesto>();
             }
             catch (Exception ex)
             {
-                // Manejo de errores
                 ViewBag.Puestos = new List<Puesto>();
                 ModelState.AddModelError("", "Error al obtener los puestos. Intente más tarde.");
             }
             return View(new Empleado());
         }
 
+        // Acción para procesar la creación
         [HttpPost]
         public async Task<IActionResult> Crear(Empleado empleado)
         {
@@ -99,7 +98,6 @@ namespace TAREA__2_BD_1.Controllers
                 {
                     return RedirectToAction("Index");
                 }
-
                 ModelState.AddModelError("", $"Error al insertar empleado: Código {codigoError}");
             }
             ViewBag.Puestos = await _databaseService.ObtenerPuestosAsync(idUsuario);
@@ -112,17 +110,12 @@ namespace TAREA__2_BD_1.Controllers
             try
             {
                 int idUsuario = HttpContext.Session.GetInt32("idUsuario") ?? 0;
-
-                // Obtener el empleado por ID (puedes usar el método ListarEmpleadosAsync con un filtro específico)
                 var empleados = await _databaseService.ListarEmpleadosAsync("", idUsuario);
                 var empleado = empleados.FirstOrDefault(e => e.Id == id);
-
                 if (empleado == null)
                 {
                     return NotFound("Empleado no encontrado.");
                 }
-
-                // Obtener los puestos para el dropdown
                 var puestos = await _databaseService.ObtenerPuestosAsync(idUsuario);
                 ViewBag.Puestos = puestos ?? new List<Puesto>();
 
@@ -145,15 +138,11 @@ namespace TAREA__2_BD_1.Controllers
             {
                 try
                 {
-                    Console.WriteLine($"Actualizando empleado: Id={empleado.Id}, Nombre={empleado.Nombre}, Documento={empleado.ValorDocumentoIdentidad}, PuestoId={empleado.IdPuesto}");
-
                     var codigoError = await _databaseService.ActualizarEmpleadoAsync(empleado, idUsuario);
-
                     if (codigoError == 0)
                     {
                         return RedirectToAction("Index");
                     }
-
                     ModelState.AddModelError("", $"Error al actualizar el empleado: Código {codigoError}");
                 }
                 catch (Exception ex)
@@ -162,9 +151,59 @@ namespace TAREA__2_BD_1.Controllers
                     Console.Error.WriteLine($"Error en Editar: {ex.Message}");
                 }
             }
-
             ViewBag.Puestos = await _databaseService.ObtenerPuestosAsync(idUsuario);
             return View(empleado);
+        }
+
+        // Accion para eliminar un empleado
+        public async Task<IActionResult> Eliminar(int id)
+        {
+            try
+            {
+                int idUsuario = HttpContext.Session.GetInt32("idUsuario") ?? 0;
+                var empleados = await _databaseService.ListarEmpleadosAsync("", idUsuario);
+                var empleado = empleados.FirstOrDefault(e => e.Id == id);
+                if (empleado == null)
+                {
+                    return NotFound("Empleado no encontrado.");
+                }
+                return View(empleado);
+            }
+            catch (Exception ex)
+            {
+                ModelState.AddModelError("", "Error al cargar los datos del empleado. Intente más tarde.");
+                return RedirectToAction("Index");
+            }
+        }
+
+        // Acción para procesar la eliminación
+        [HttpPost]
+        public async Task<IActionResult> EliminarConfirmado(int id)
+        {
+            int idUsuario = HttpContext.Session.GetInt32("idUsuario") ?? 0;
+
+            try
+            {
+                var empleados = await _databaseService.ListarEmpleadosAsync("", idUsuario);
+                var empleado = empleados.FirstOrDefault(e => e.Id == id);
+                if (empleado == null)
+                {
+                    return NotFound("Empleado no encontrado.");
+                }
+
+                var codigoError = await _databaseService.EliminarEmpleadoAsync(empleado, idUsuario);
+                if (codigoError == 0)
+                {
+                    return RedirectToAction("Index");
+                }
+
+                ModelState.AddModelError("", $"Error al eliminar el empleado: Código {codigoError}");
+            }
+            catch (Exception ex)
+            {
+                ModelState.AddModelError("", "Error al eliminar el empleado. Intente más tarde.");
+            }
+            return RedirectToAction("Eliminar", new { id });
         }
     }
 }
