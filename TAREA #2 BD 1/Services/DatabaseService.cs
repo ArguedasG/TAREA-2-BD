@@ -268,7 +268,7 @@ namespace TAREA__2_BD_1.Services
                     using (var command = new SqlCommand("sp_DeleteEmpleado", connection))
                     {
                         command.CommandType = CommandType.StoredProcedure;
-                        command.Parameters.AddWithValue("@inIdEmpleado", empleado.Id);
+                        command.Parameters.AddWithValue("@inEmpleadoId", empleado.Id);
                         command.Parameters.AddWithValue("@inUserId", idUsuario);
                         string myIP = "";
                         var host = Dns.GetHostEntry(Dns.GetHostName());
@@ -287,7 +287,6 @@ namespace TAREA__2_BD_1.Services
                         };
                         command.Parameters.Add(codigoError);
                         await command.ExecuteNonQueryAsync();
-                        Console.WriteLine($"Código de error: {codigoError.Value}");
                         return (int)codigoError.Value;
                     }
                 }
@@ -305,5 +304,71 @@ namespace TAREA__2_BD_1.Services
                 throw;
             }
         }
+        public async Task<Empleado> ConsultarEmpleadoAsync(int idEmpleado, int idUsuario)
+        {
+            try
+            {
+                using (var connection = new SqlConnection(_connectionString))
+                {
+                    await connection.OpenAsync();
+                    using (var command = new SqlCommand("sp_ConsultarEmpleado", connection))
+                    {
+                        command.CommandType = CommandType.StoredProcedure;
+
+                        command.Parameters.AddWithValue("@inEmpleadoId", idEmpleado);
+                        command.Parameters.AddWithValue("@inUserId", idUsuario);
+
+                        // Obtener IP local
+                        string myIP = "";
+                        var host = Dns.GetHostEntry(Dns.GetHostName());
+                        foreach (var ip in host.AddressList)
+                        {
+                            if (ip.AddressFamily == AddressFamily.InterNetwork)
+                            {
+                                myIP = ip.ToString();
+                                break;
+                            }
+                        }
+                        command.Parameters.AddWithValue("@inPostInIP", myIP);
+
+                        var codigoErrorParam = new SqlParameter("@outCodigoError", SqlDbType.Int)
+                        {
+                            Direction = ParameterDirection.Output
+                        };
+                        command.Parameters.Add(codigoErrorParam);
+
+                        using (var reader = await command.ExecuteReaderAsync())
+                        {
+                            if (reader.HasRows && await reader.ReadAsync())
+                            {
+                                var empleado = new Empleado
+                                {
+                                    ValorDocumentoIdentidad = reader["ValorDocumentoIdentidad"].ToString(),
+                                    Nombre = reader["Nombre"].ToString(),
+                                    NombrePuesto = reader["NombrePuesto"].ToString(),
+                                    SaldoVacaciones = Convert.ToDecimal(reader["SaldoVacaciones"])
+                                };
+                                return empleado;
+                            }
+                            else
+                            {
+                                return null;
+                            }
+                        }
+                    }
+                }
+            }
+            catch (SqlException ex)
+            {
+                Console.Error.WriteLine($"Error de SQL: {ex.Message}");
+                throw;
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"Error general: {ex.Message}");
+                throw;
+            }
+        }
+
     }
 }

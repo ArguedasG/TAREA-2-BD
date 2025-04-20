@@ -1,0 +1,27 @@
+﻿@model TAREA__2_BD_1.Models.Empleado
+
+@{
+    ViewData["Title"] = "Consulta";
+}
+
+<h2>Consulta de empleados</h2>
+
+<div class="card mt-4">
+    <div class="card-body">
+        <dl class="row">
+            <dt class="col-sm-3">Nombre</dt>
+            <dd class="col-sm-9">@Model.Nombre</dd>
+
+            <dt class="col-sm-3">Documento Identidad</dt>
+            <dd class="col-sm-9">@Model.ValorDocumentoIdentidad</dd>
+
+            <dt class="col-sm-3">Puesto</dt>
+            <dd class="col-sm-9">@Model.NombrePuesto</dd>
+
+            <dt class="col-sm-3">Saldo Vacaciones</dt>
+            <dd class="col-sm-9">@Model.SaldoVacaciones</dd>
+        </dl>
+
+        <a asp-action="Index" class="btn btn-secondary">Salir</a>
+    </div>
+</div>

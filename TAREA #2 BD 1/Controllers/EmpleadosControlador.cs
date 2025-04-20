@@ -203,7 +203,32 @@ namespace TAREA__2_BD_1.Controllers
             {
                 ModelState.AddModelError("", "Error al eliminar el empleado. Intente más tarde.");
             }
-            return RedirectToAction("Eliminar", new { id });
+            return RedirectToAction("Eliminar");
+        }
+
+        // Accion para consultar un empleado
+        public async Task<IActionResult> Consulta(int id)
+        {
+            try
+            {
+                Console.WriteLine($"ID del empleado a consultar: {id}");
+                int idUsuario = HttpContext.Session.GetInt32("idUsuario") ?? 0;
+                var empleado = await _databaseService.ConsultarEmpleadoAsync(id, idUsuario);
+                Console.WriteLine($"Empleado consultado: {empleado}");
+
+                if (empleado == null)
+                {
+                    TempData["Error"] = "El empleado no fue encontrado o está inactivo.";
+                    return RedirectToAction("Index");
+                }
+
+                return View(empleado);
+            }
+            catch (Exception ex)
+            {
+                ModelState.AddModelError("", "Error al cargar los datos del empleado. Intente más tarde.");
+                return RedirectToAction("Index");
+            }
         }
     }
 }
