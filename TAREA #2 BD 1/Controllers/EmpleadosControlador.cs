@@ -230,5 +230,30 @@ namespace TAREA__2_BD_1.Controllers
                 return RedirectToAction("Index");
             }
         }
+
+        // Acción para listar movimientos de un empleado
+        public async Task<IActionResult> ListarMovimientos(string valorDocumentoIdentidad)
+        {
+            try
+            {
+                int idUsuario = HttpContext.Session.GetInt32("idUsuario") ?? 0;
+
+                // Llamar al servicio para obtener los movimientos
+                var detalleMovimientos = await _databaseService.ListarMovimientosPorEmpleadoAsync(valorDocumentoIdentidad, idUsuario);
+
+                if (detalleMovimientos == null || detalleMovimientos.Movimientos.Count == 0)
+                {
+                    TempData["Mensaje"] = "No se encontraron movimientos para el empleado.";
+                }
+
+                return View(detalleMovimientos);
+            }
+            catch (Exception ex)
+            {
+                ModelState.AddModelError("", "Error al cargar los movimientos. Intente más tarde.");
+                Console.Error.WriteLine($"Error en ListarMovimientos: {ex.Message}");
+                return RedirectToAction("Index");
+            }
+        }
     }
 }
