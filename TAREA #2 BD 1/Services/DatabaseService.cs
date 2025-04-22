@@ -370,5 +370,75 @@ namespace TAREA__2_BD_1.Services
             }
         }
 
+        public async Task<DetalleMovimientos> ListarMovimientosPorEmpleadoAsync(string valorDocumentoIdentidad, int idUsuario)
+        {
+            var detalleMovimientos = new DetalleMovimientos();
+
+            using (var connection = new SqlConnection(_connectionString))
+            {
+                await connection.OpenAsync();
+                using (var command = new SqlCommand("ListarMovimientosPorEmpleado", connection))
+                {
+                    command.CommandType = CommandType.StoredProcedure;
+                    command.Parameters.AddWithValue("@inValorDocumentoIdentidad", valorDocumentoIdentidad);
+                    command.Parameters.AddWithValue("@inUserId", idUsuario);
+
+                    // Obtener IP local
+                    string myIP = "";
+                    var host = Dns.GetHostEntry(Dns.GetHostName());
+                    foreach (var ip in host.AddressList)
+                    {
+                        if (ip.AddressFamily == AddressFamily.InterNetwork)
+                        {
+                            myIP = ip.ToString();
+                            break;
+                        }
+                    }
+                    command.Parameters.AddWithValue("@inIP", myIP);
+
+                    var codigoErrorParam = new SqlParameter("@outResultCode", SqlDbType.Int)
+                    {
+                        Direction = ParameterDirection.Output
+                    };
+                    command.Parameters.Add(codigoErrorParam);
+
+                    using (var reader = await command.ExecuteReaderAsync())
+                    {
+                        if (reader.HasRows)
+                        {
+                            while (await reader.ReadAsync())
+                            {
+                                if (detalleMovimientos.ValorDocumentoIdentidad == null)
+                                {
+                                    detalleMovimientos.ValorDocumentoIdentidad = reader["ValorDocumentoIdentidad"].ToString();
+                                    detalleMovimientos.NombreEmpleado = reader["NombreEmpleado"].ToString();
+                                    detalleMovimientos.SaldoVacaciones = Convert.ToDecimal(reader["SaldoVacaciones"]);
+                                }
+
+                                detalleMovimientos.Movimientos.Add(new Movimiento
+                                {
+                                    FechaMovimiento = reader.GetDateTime(reader.GetOrdinal("FechaMovimiento")),
+                                    NombreTipoMovimiento = reader["NombreTipoMovimiento"].ToString(),
+                                    Monto = Convert.ToDecimal(reader["Monto"]),
+                                    NuevoSaldo = Convert.ToDecimal(reader["NuevoSaldo"]),
+                                    NombreUsuario = reader["NombreUsuario"].ToString(),
+                                    IP = reader["IP"].ToString(),
+                                    FechaHoraRegistro = reader.GetDateTime(reader.GetOrdinal("FechaHoraRegistro"))
+                                });
+                            }
+                        }
+                    }
+
+                    int codigoError = (int)codigoErrorParam.Value;
+                    if (codigoError != 0)
+                    {
+                        throw new Exception($"Error en ListarMovimientosPorEmpleado. Código de error: {codigoError}");
+                    }
+                }
+            }
+
+            return detalleMovimientos;
+        }
+
     }
 }
