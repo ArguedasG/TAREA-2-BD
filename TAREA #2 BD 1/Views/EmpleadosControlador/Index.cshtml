@@ -39,7 +39,7 @@
                         <a asp-action="Editar" asp-route-id="@empleado.Id" class="btn btn-primary btn-sm">Actualizar</a>
                         <a asp-action="Eliminar" asp-route-id="@empleado.Id" class="btn btn-danger btn-sm">Eliminar</a>
                         <a asp-action="Consulta" asp-route-id="@empleado.Id" class="btn btn-info btn-sm">Consulta</a>
-                        <a asp-action="Movimientos" asp-route-id="@empleado.Id" class="btn btn-warning btn-sm">Movimientos</a>
+                        <a asp-action="Movimientos" asp-route-valorDocumentoIdentidad="@empleado.ValorDocumentoIdentidad" class="btn btn-warning btn-sm">Movimientos</a>
                     </td>
                 </tr>
             }

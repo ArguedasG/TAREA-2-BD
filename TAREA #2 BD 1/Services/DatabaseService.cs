@@ -412,18 +412,28 @@ namespace TAREA__2_BD_1.Services
                                 {
                                     detalleMovimientos.ValorDocumentoIdentidad = reader["ValorDocumentoIdentidad"].ToString();
                                     detalleMovimientos.NombreEmpleado = reader["NombreEmpleado"].ToString();
-                                    detalleMovimientos.SaldoVacaciones = Convert.ToDecimal(reader["SaldoVacaciones"]);
+                                    detalleMovimientos.SaldoVacaciones = reader["SaldoVacaciones"] != DBNull.Value
+                                        ? Convert.ToDecimal(reader["SaldoVacaciones"])
+                                        : 0;
                                 }
 
                                 detalleMovimientos.Movimientos.Add(new Movimiento
                                 {
-                                    FechaMovimiento = reader.GetDateTime(reader.GetOrdinal("FechaMovimiento")),
-                                    NombreTipoMovimiento = reader["NombreTipoMovimiento"].ToString(),
-                                    Monto = Convert.ToDecimal(reader["Monto"]),
-                                    NuevoSaldo = Convert.ToDecimal(reader["NuevoSaldo"]),
-                                    NombreUsuario = reader["NombreUsuario"].ToString(),
-                                    IP = reader["IP"].ToString(),
-                                    FechaHoraRegistro = reader.GetDateTime(reader.GetOrdinal("FechaHoraRegistro"))
+                                    FechaMovimiento = reader["FechaMovimiento"] != DBNull.Value
+                                        ? reader.GetDateTime(reader.GetOrdinal("FechaMovimiento"))
+                                        : DateTime.MinValue,
+                                    NombreTipoMovimiento = reader["NombreTipoMovimiento"]?.ToString() ?? "Desconocido",
+                                    Monto = reader["Monto"] != DBNull.Value
+                                        ? Convert.ToDecimal(reader["Monto"])
+                                        : 0,
+                                    NuevoSaldo = reader["NuevoSaldo"] != DBNull.Value
+                                        ? Convert.ToDecimal(reader["NuevoSaldo"])
+                                        : 0,
+                                    NombreUsuario = reader["NombreUsuario"]?.ToString() ?? "Desconocido",
+                                    IP = reader["IP"]?.ToString() ?? "N/A",
+                                    FechaHoraRegistro = reader["FechaHoraRegistro"] != DBNull.Value
+                                        ? reader.GetDateTime(reader.GetOrdinal("FechaHoraRegistro"))
+                                        : DateTime.MinValue
                                 });
                             }
                         }

@@ -232,7 +232,7 @@ namespace TAREA__2_BD_1.Controllers
         }
 
         // Acción para listar movimientos de un empleado
-        public async Task<IActionResult> ListarMovimientos(string valorDocumentoIdentidad)
+        public async Task<IActionResult> Movimientos(string valorDocumentoIdentidad)
         {
             try
             {
@@ -246,12 +246,12 @@ namespace TAREA__2_BD_1.Controllers
                     TempData["Mensaje"] = "No se encontraron movimientos para el empleado.";
                 }
 
-                return View(detalleMovimientos);
+                return View("ListarMovimientos", detalleMovimientos);
             }
             catch (Exception ex)
             {
                 ModelState.AddModelError("", "Error al cargar los movimientos. Intente más tarde.");
-                Console.Error.WriteLine($"Error en ListarMovimientos: {ex.Message}");
+                Console.Error.WriteLine($"Error en Movimientos: {ex.Message}");
                 return RedirectToAction("Index");
             }
         }

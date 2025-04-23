@@ -1,0 +1,61 @@
+﻿@model TAREA__2_BD_1.Models.DetalleMovimientos
+
+<div class="container">
+    <h2>Movimientos del Empleado</h2>
+
+    <div class="card mb-3">
+        <div class="card-body">
+            <h5 class="card-title">Información del Empleado</h5>
+            <p><strong>Valor Documento Identidad:</strong> @Model.ValorDocumentoIdentidad</p>
+            <p><strong>Nombre:</strong> @Model.NombreEmpleado</p>
+            <p><strong>Saldo Vacaciones:</strong> @Model.SaldoVacaciones</p>
+        </div>
+    </div>
+
+    <div class="mb-3">
+        <a asp-action="InsertarMovimiento" asp-route-valorDocumentoIdentidad="@Model.ValorDocumentoIdentidad" class="btn btn-primary">
+            Insertar Movimiento
+        </a>
+    </div>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Fecha</th>
+                <th>Tipo de Movimiento</th>
+                <th>Monto</th>
+                <th>Nuevo Saldo</th>
+                <th>Usuario</th>
+                <th>IP</th>
+                <th>Estampa de Tiempo</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model.Movimientos != null && Model.Movimientos.Any())
+            {
+                @foreach (var movimiento in Model.Movimientos)
+                {
+                    <tr>
+                        <td>@movimiento.FechaMovimiento.ToString("dd/MM/yyyy HH:mm")</td>
+                        <td>@movimiento.NombreTipoMovimiento</td>
+                        <td>@movimiento.Monto</td>
+                        <td>@movimiento.NuevoSaldo</td>
+                        <td>@movimiento.NombreUsuario</td>
+                        <td>@movimiento.IP</td>
+                        <td>@movimiento.FechaHoraRegistro.ToString("dd/MM/yyyy HH:mm")</td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="7" class="text-center">No se encontraron movimientos.</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <div class="mt-3">
+        <a asp-action="Index" class="btn btn-secondary">Volver</a>
+    </div>
+</div>
