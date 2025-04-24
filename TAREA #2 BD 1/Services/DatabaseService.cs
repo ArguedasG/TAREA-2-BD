@@ -450,5 +450,64 @@ namespace TAREA__2_BD_1.Services
             return detalleMovimientos;
         }
 
+        public async Task<int> InsertarMovimientoAsync(string valorDocumentoIdentidad, int idTipoMovimiento, decimal monto, int idUsuario)
+        {
+            try
+            {
+                using (var connection = new SqlConnection(_connectionString))
+                {
+                    await connection.OpenAsync();
+                    using (var command = new SqlCommand("sp_InsertarMovimiento", connection))
+                    {
+                        command.CommandType = CommandType.StoredProcedure;
+
+                        // Parámetros de entrada
+                        command.Parameters.AddWithValue("@inValorDocumentoIdentidad", valorDocumentoIdentidad);
+                        command.Parameters.AddWithValue("@inIdTipoMovimiento", idTipoMovimiento);
+                        command.Parameters.AddWithValue("@inMonto", monto);
+                        command.Parameters.AddWithValue("@inUserId", idUsuario);
+
+                        // Obtener IP local
+                        string myIP = "";
+                        var host = Dns.GetHostEntry(Dns.GetHostName());
+                        foreach (var ip in host.AddressList)
+                        {
+                            if (ip.AddressFamily == AddressFamily.InterNetwork)
+                            {
+                                myIP = ip.ToString();
+                                break;
+                            }
+                        }
+                        command.Parameters.AddWithValue("@inIP", myIP);
+
+                        // Parámetro de salida
+                        var codigoErrorParam = new SqlParameter("@outCodigoError", SqlDbType.Int)
+                        {
+                            Direction = ParameterDirection.Output
+                        };
+                        command.Parameters.Add(codigoErrorParam);
+
+                        // Ejecutar el procedimiento almacenado
+                        await command.ExecuteNonQueryAsync();
+
+                        // Retornar el código de error
+                        return (int)codigoErrorParam.Value;
+                    }
+                }
+            }
+            catch (SqlException ex)
+            {
+                Console.Error.WriteLine($"Error de SQL: {ex.Message}");
+                Console.Error.WriteLine($"StackTrace: {ex.StackTrace}");
+                throw;
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"Error general: {ex.Message}");
+                Console.Error.WriteLine($"StackTrace: {ex.StackTrace}");
+                throw;
+            }
+        }
+
     }
 }
