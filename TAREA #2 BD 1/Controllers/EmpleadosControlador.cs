@@ -255,5 +255,60 @@ namespace TAREA__2_BD_1.Controllers
                 return RedirectToAction("Index");
             }
         }
+
+        // Acción para mostrar el formulario de inserción de movimiento
+        public IActionResult InsertarMovimiento(string valorDocumentoIdentidad)
+        {
+            var modelo = new Movimiento
+            {
+                FechaMovimiento = DateTime.Now, // Fecha actual por defecto
+                NombreTipoMovimiento = "", // Se seleccionará en el formulario
+                Monto = 0,
+                NuevoSaldo = 0,
+                NombreUsuario = "",
+                IP = "",
+                FechaHoraRegistro = DateTime.Now
+            };
+
+            ViewBag.ValorDocumentoIdentidad = valorDocumentoIdentidad;
+            return View(modelo);
+        }
+
+        // Acción para procesar la inserción de movimiento
+        [HttpPost]
+        public async Task<IActionResult> InsertarMovimiento(Movimiento movimiento, string valorDocumentoIdentidad)
+        {
+            int idUsuario = HttpContext.Session.GetInt32("idUsuario") ?? 0;
+
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    // Llamar al servicio para insertar el movimiento
+                    var codigoError = await _databaseService.InsertarMovimientoAsync(
+                        valorDocumentoIdentidad,
+                        movimiento.IdTipoMovimiento, // Usar el ID del tipo de movimiento
+                        movimiento.Monto,
+                        idUsuario
+                    );
+
+                    if (codigoError == 0)
+                    {
+                        TempData["Mensaje"] = "Movimiento insertado correctamente.";
+                        return RedirectToAction("Movimientos", new { valorDocumentoIdentidad });
+                    }
+
+                    ModelState.AddModelError("", $"Error al insertar el movimiento: Código {codigoError}");
+                }
+                catch (Exception ex)
+                {
+                    ModelState.AddModelError("", "Error al insertar el movimiento. Intente más tarde.");
+                    Console.Error.WriteLine($"Error en InsertarMovimiento: {ex.Message}");
+                }
+            }
+
+            ViewBag.ValorDocumentoIdentidad = valorDocumentoIdentidad;
+            return View(movimiento);
+        }
     }
 }

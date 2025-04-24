@@ -3,7 +3,8 @@
     public class Movimiento
     {
         public DateTime FechaMovimiento { get; set; }
-        public string NombreTipoMovimiento { get; set; }
+        public int IdTipoMovimiento { get; set; } // Nuevo campo para el ID del tipo de movimiento
+        public string NombreTipoMovimiento { get; set; } // Opcional, solo para mostrar en la UI
         public decimal Monto { get; set; }
         public decimal NuevoSaldo { get; set; }
         public string NombreUsuario { get; set; }
