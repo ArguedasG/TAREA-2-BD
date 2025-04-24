@@ -461,13 +461,11 @@ namespace TAREA__2_BD_1.Services
                     {
                         command.CommandType = CommandType.StoredProcedure;
 
-                        // Parámetros de entrada
                         command.Parameters.AddWithValue("@inValorDocumentoIdentidad", valorDocumentoIdentidad);
                         command.Parameters.AddWithValue("@inIdTipoMovimiento", idTipoMovimiento);
                         command.Parameters.AddWithValue("@inMonto", monto);
                         command.Parameters.AddWithValue("@inUserId", idUsuario);
 
-                        // Obtener IP local
                         string myIP = "";
                         var host = Dns.GetHostEntry(Dns.GetHostName());
                         foreach (var ip in host.AddressList)
@@ -480,25 +478,20 @@ namespace TAREA__2_BD_1.Services
                         }
                         command.Parameters.AddWithValue("@inPostInIP", myIP);
 
-                        // Parámetro de salida
-                        var codigoErrorParam = new SqlParameter("@outResultCode", SqlDbType.Int)
+                        var codigoErrorParam = new SqlParameter("@outCodigoError", SqlDbType.Int)
                         {
                             Direction = ParameterDirection.Output
                         };
                         command.Parameters.Add(codigoErrorParam);
 
-                        // Ejecutar el procedimiento almacenado
                         await command.ExecuteNonQueryAsync();
 
-                        // Validar el código de error devuelto por el procedimiento almacenado
                         int codigoError = (int)codigoErrorParam.Value;
                         if (codigoError != 0)
                         {
-                            // Manejar errores específicos según el código devuelto
                             throw new Exception($"Error en sp_InsertarMovimiento. Código de error: {codigoError}");
                         }
 
-                        // Retornar el código de éxito
                         return codigoError;
                     }
                 }
@@ -548,6 +541,18 @@ namespace TAREA__2_BD_1.Services
                     };
                     command.Parameters.Add(codigoErrorParam);
 
+                    string myIP = "";
+                    var host = Dns.GetHostEntry(Dns.GetHostName());
+                    foreach (var ip in host.AddressList)
+                    {
+                        if (ip.AddressFamily == AddressFamily.InterNetwork)
+                        {
+                            myIP = ip.ToString();
+                            break;
+                        }
+                    }
+                    command.Parameters.AddWithValue("@inPostInIP", myIP);
+
                     using (var reader = await command.ExecuteReaderAsync())
                     {
                         while (await reader.ReadAsync())
@@ -568,9 +573,7 @@ namespace TAREA__2_BD_1.Services
                     }
                 }
             }
-
             return tiposMovimiento;
         }
-
     }
 }

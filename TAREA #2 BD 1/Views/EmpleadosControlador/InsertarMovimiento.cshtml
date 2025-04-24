@@ -13,7 +13,7 @@
 
         <!-- Campo para seleccionar el tipo de movimiento -->
         <div class="form-group">
-            <label for="IdTipoMovimiento">Tipo de Movimiento</label>
+            <label for="Id">Tipo de Movimiento</label>
             <select asp-for="IdTipoMovimiento" class="form-control" required>
                 <option value="">Seleccione un tipo de movimiento</option>
                 @foreach (var tipo in ViewBag.TiposMovimiento as List<TAREA__2_BD_1.Models.TipoMovimiento>)
