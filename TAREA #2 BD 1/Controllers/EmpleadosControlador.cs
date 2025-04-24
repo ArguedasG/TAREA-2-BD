@@ -257,21 +257,38 @@ namespace TAREA__2_BD_1.Controllers
         }
 
         // Acción para mostrar el formulario de inserción de movimiento
-        public IActionResult InsertarMovimiento(string valorDocumentoIdentidad)
+        public async Task<IActionResult> InsertarMovimiento(string valorDocumentoIdentidad)
         {
-            var modelo = new Movimiento
+            try
             {
-                FechaMovimiento = DateTime.Now, // Fecha actual por defecto
-                NombreTipoMovimiento = "", // Se seleccionará en el formulario
-                Monto = 0,
-                NuevoSaldo = 0,
-                NombreUsuario = "",
-                IP = "",
-                FechaHoraRegistro = DateTime.Now
-            };
+                int idUsuario = HttpContext.Session.GetInt32("idUsuario") ?? 0;
 
-            ViewBag.ValorDocumentoIdentidad = valorDocumentoIdentidad;
-            return View(modelo);
+                // Obtener los tipos de movimiento desde la base de datos
+                var tiposMovimiento = await _databaseService.ObtenerTiposMovimientoAsync(idUsuario);
+
+                // Crear el modelo inicial
+                var modelo = new Movimiento
+                {
+                    FechaMovimiento = DateTime.Now, // Fecha actual por defecto
+                    Monto = 0,
+                    NombreTipoMovimiento = "", // Se seleccionará en el formulario
+                    NuevoSaldo = 0,
+                    NombreUsuario = "",
+                    IP = "",
+                    FechaHoraRegistro = DateTime.Now
+                };
+
+                ViewBag.TiposMovimiento = tiposMovimiento ?? new List<TipoMovimiento>();
+                ViewBag.ValorDocumentoIdentidad = valorDocumentoIdentidad;
+
+                return View(modelo);
+            }
+            catch (Exception ex)
+            {
+                ModelState.AddModelError("", "Error al cargar el formulario de inserción de movimiento. Intente más tarde.");
+                Console.Error.WriteLine($"Error en InsertarMovimiento: {ex.Message}");
+                return RedirectToAction("Movimientos", new { valorDocumentoIdentidad });
+            }
         }
 
         // Acción para procesar la inserción de movimiento
@@ -298,7 +315,22 @@ namespace TAREA__2_BD_1.Controllers
                         return RedirectToAction("Movimientos", new { valorDocumentoIdentidad });
                     }
 
-                    ModelState.AddModelError("", $"Error al insertar el movimiento: Código {codigoError}");
+                    // Manejar errores específicos devueltos por el procedimiento almacenado
+                    switch (codigoError)
+                    {
+                        case 50004:
+                            ModelState.AddModelError("", "El empleado no existe.");
+                            break;
+                        case 50008:
+                            ModelState.AddModelError("", "El tipo de movimiento no es válido.");
+                            break;
+                        case 50011:
+                            ModelState.AddModelError("", "El monto ingresado es inválido o el saldo resultante sería negativo.");
+                            break;
+                        default:
+                            ModelState.AddModelError("", $"Error desconocido al insertar el movimiento. Código: {codigoError}");
+                            break;
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -307,7 +339,10 @@ namespace TAREA__2_BD_1.Controllers
                 }
             }
 
+            // Recargar los datos necesarios para la vista en caso de error
+            ViewBag.TiposMovimiento = await _databaseService.ObtenerTiposMovimientoAsync(idUsuario);
             ViewBag.ValorDocumentoIdentidad = valorDocumentoIdentidad;
+
             return View(movimiento);
         }
     }

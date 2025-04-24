@@ -481,7 +481,7 @@ namespace TAREA__2_BD_1.Services
                         command.Parameters.AddWithValue("@inIP", myIP);
 
                         // Parámetro de salida
-                        var codigoErrorParam = new SqlParameter("@outCodigoError", SqlDbType.Int)
+                        var codigoErrorParam = new SqlParameter("@outResultCode", SqlDbType.Int)
                         {
                             Direction = ParameterDirection.Output
                         };
@@ -490,8 +490,16 @@ namespace TAREA__2_BD_1.Services
                         // Ejecutar el procedimiento almacenado
                         await command.ExecuteNonQueryAsync();
 
-                        // Retornar el código de error
-                        return (int)codigoErrorParam.Value;
+                        // Validar el código de error devuelto por el procedimiento almacenado
+                        int codigoError = (int)codigoErrorParam.Value;
+                        if (codigoError != 0)
+                        {
+                            // Manejar errores específicos según el código devuelto
+                            throw new Exception($"Error en sp_InsertarMovimiento. Código de error: {codigoError}");
+                        }
+
+                        // Retornar el código de éxito
+                        return codigoError;
                     }
                 }
             }
@@ -499,14 +507,56 @@ namespace TAREA__2_BD_1.Services
             {
                 Console.Error.WriteLine($"Error de SQL: {ex.Message}");
                 Console.Error.WriteLine($"StackTrace: {ex.StackTrace}");
-                throw;
+                throw new Exception("Ocurrió un error al intentar insertar el movimiento en la base de datos.", ex);
             }
             catch (Exception ex)
             {
                 Console.Error.WriteLine($"Error general: {ex.Message}");
                 Console.Error.WriteLine($"StackTrace: {ex.StackTrace}");
-                throw;
+                throw new Exception("Ocurrió un error inesperado al insertar el movimiento.", ex);
             }
+        }
+
+        public async Task<List<TipoMovimiento>> ObtenerTiposMovimientoAsync(int idUsuario)
+        {
+            var tiposMovimiento = new List<TipoMovimiento>();
+
+            using (var connection = new SqlConnection(_connectionString))
+            {
+                await connection.OpenAsync();
+                using (var command = new SqlCommand("sp_ObtenerTiposMovimiento", connection))
+                {
+                    command.CommandType = CommandType.StoredProcedure;
+                    command.Parameters.AddWithValue("@inUserId", idUsuario);
+
+                    var codigoErrorParam = new SqlParameter("@outCodigoError", SqlDbType.Int)
+                    {
+                        Direction = ParameterDirection.Output
+                    };
+                    command.Parameters.Add(codigoErrorParam);
+
+                    using (var reader = await command.ExecuteReaderAsync())
+                    {
+                        while (await reader.ReadAsync())
+                        {
+                            tiposMovimiento.Add(new TipoMovimiento
+                            {
+                                Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                                Nombre = reader.GetString(reader.GetOrdinal("Nombre")),
+                                TipoAccion = reader.GetString(reader.GetOrdinal("TipoAccion"))
+                            });
+                        }
+                    }
+
+                    int codigoError = (int)codigoErrorParam.Value;
+                    if (codigoError != 0)
+                    {
+                        throw new Exception($"Error en sp_ObtenerTiposMovimiento. Código de error: {codigoError}");
+                    }
+                }
+            }
+
+            return tiposMovimiento;
         }
 
     }
