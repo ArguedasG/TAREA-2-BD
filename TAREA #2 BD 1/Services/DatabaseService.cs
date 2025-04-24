@@ -394,9 +394,9 @@ namespace TAREA__2_BD_1.Services
                             break;
                         }
                     }
-                    command.Parameters.AddWithValue("@inIP", myIP);
+                    command.Parameters.AddWithValue("@inPostInIP", myIP);
 
-                    var codigoErrorParam = new SqlParameter("@outResultCode", SqlDbType.Int)
+                    var codigoErrorParam = new SqlParameter("@outCodigoError", SqlDbType.Int)
                     {
                         Direction = ParameterDirection.Output
                     };
@@ -478,7 +478,7 @@ namespace TAREA__2_BD_1.Services
                                 break;
                             }
                         }
-                        command.Parameters.AddWithValue("@inIP", myIP);
+                        command.Parameters.AddWithValue("@inPostInIP", myIP);
 
                         // Parámetro de salida
                         var codigoErrorParam = new SqlParameter("@outResultCode", SqlDbType.Int)
@@ -524,10 +524,23 @@ namespace TAREA__2_BD_1.Services
             using (var connection = new SqlConnection(_connectionString))
             {
                 await connection.OpenAsync();
-                using (var command = new SqlCommand("sp_ObtenerTiposMovimiento", connection))
+                using (var command = new SqlCommand("sp_ObtenerTipoMovimiento", connection))
                 {
                     command.CommandType = CommandType.StoredProcedure;
                     command.Parameters.AddWithValue("@inUserId", idUsuario);
+
+                    // Obtener IP local
+                    string myIP = "";
+                    var host = Dns.GetHostEntry(Dns.GetHostName());
+                    foreach (var ip in host.AddressList)
+                    {
+                        if (ip.AddressFamily == AddressFamily.InterNetwork)
+                        {
+                            myIP = ip.ToString();
+                            break;
+                        }
+                    }
+                    command.Parameters.AddWithValue("@inPostInIP", myIP);
 
                     var codigoErrorParam = new SqlParameter("@outCodigoError", SqlDbType.Int)
                     {
@@ -551,7 +564,7 @@ namespace TAREA__2_BD_1.Services
                     int codigoError = (int)codigoErrorParam.Value;
                     if (codigoError != 0)
                     {
-                        throw new Exception($"Error en sp_ObtenerTiposMovimiento. Código de error: {codigoError}");
+                        throw new Exception($"Error en sp_ObtenerTipoMovimiento. Código de error: {codigoError}");
                     }
                 }
             }
