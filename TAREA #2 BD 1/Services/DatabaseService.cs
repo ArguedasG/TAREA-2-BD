@@ -377,7 +377,7 @@ namespace TAREA__2_BD_1.Services
             using (var connection = new SqlConnection(_connectionString))
             {
                 await connection.OpenAsync();
-                using (var command = new SqlCommand("ListarMovimientosPorEmpleado", connection))
+                using (var command = new SqlCommand("sp_ListarMovimientosPorEmpleado", connection))
                 {
                     command.CommandType = CommandType.StoredProcedure;
                     command.Parameters.AddWithValue("@inValorDocumentoIdentidad", valorDocumentoIdentidad);
