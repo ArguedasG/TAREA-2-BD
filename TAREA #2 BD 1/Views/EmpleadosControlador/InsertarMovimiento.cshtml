@@ -1,8 +1,21 @@
 ﻿@model TAREA__2_BD_1.Models.Movimiento
 
-<div class="container">
-    <h2>Insertar Movimiento</h2>
+@{
+    ViewData["Title"] = "Insertar Movimiento";
+}
 
+<h2>@ViewData["Title"]</h2>
+@if (ViewData.ModelState[""]?.Errors.Count > 0)
+{
+    <div class="alert alert-danger">
+        @foreach (var error in ViewData.ModelState[""].Errors)
+        {
+            <p>@error.ErrorMessage</p>
+        }
+    </div>
+}
+
+<div class="container">
     <form asp-action="InsertarMovimiento" method="post">
         <input type="hidden" asp-for="FechaMovimiento" />
         <input type="hidden" asp-for="NuevoSaldo" />

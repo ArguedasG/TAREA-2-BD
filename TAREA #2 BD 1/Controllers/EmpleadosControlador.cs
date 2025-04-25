@@ -172,6 +172,7 @@ namespace TAREA__2_BD_1.Controllers
             catch (Exception ex)
             {
                 ModelState.AddModelError("", "Error al cargar los datos del empleado. Intente más tarde.");
+                Console.Error.WriteLine($"Error en Eliminar: {ex.Message}");
                 return RedirectToAction("Index");
             }
         }
@@ -202,6 +203,7 @@ namespace TAREA__2_BD_1.Controllers
             catch (Exception ex)
             {
                 ModelState.AddModelError("", "Error al eliminar el empleado. Intente más tarde.");
+                Console.Error.WriteLine($"Error en EliminarConfirmado: {ex.Message}");
             }
             return RedirectToAction("Eliminar");
         }
@@ -211,10 +213,8 @@ namespace TAREA__2_BD_1.Controllers
         {
             try
             {
-                Console.WriteLine($"ID del empleado a consultar: {id}");
                 int idUsuario = HttpContext.Session.GetInt32("idUsuario") ?? 0;
                 var empleado = await _databaseService.ConsultarEmpleadoAsync(id, idUsuario);
-                Console.WriteLine($"Empleado consultado: {empleado}");
 
                 if (empleado == null)
                 {
@@ -227,6 +227,7 @@ namespace TAREA__2_BD_1.Controllers
             catch (Exception ex)
             {
                 ModelState.AddModelError("", "Error al cargar los datos del empleado. Intente más tarde.");
+                Console.Error.WriteLine($"Error en Consulta: {ex.Message}");
                 return RedirectToAction("Index");
             }
         }
@@ -237,8 +238,6 @@ namespace TAREA__2_BD_1.Controllers
             try
             {
                 int idUsuario = HttpContext.Session.GetInt32("idUsuario") ?? 0;
-
-                // Llamar al servicio para obtener los movimientos
                 var detalleMovimientos = await _databaseService.ListarMovimientosPorEmpleadoAsync(valorDocumentoIdentidad, idUsuario);
 
                 if (detalleMovimientos == null || detalleMovimientos.Movimientos.Count == 0)
@@ -262,8 +261,6 @@ namespace TAREA__2_BD_1.Controllers
             try
             {
                 int idUsuario = HttpContext.Session.GetInt32("idUsuario") ?? 0;
-
-                // Obtener los tipos de movimiento desde la base de datos
                 var tiposMovimiento = await _databaseService.ObtenerTiposMovimientoAsync(idUsuario);
 
                 ViewBag.TiposMovimiento = tiposMovimiento ?? new List<TipoMovimiento>();
@@ -284,12 +281,6 @@ namespace TAREA__2_BD_1.Controllers
         public async Task<IActionResult> InsertarMovimiento(Movimiento movimiento, string valorDocumentoIdentidad)
         {
             int idUsuario = HttpContext.Session.GetInt32("idUsuario") ?? 0;
-            Console.WriteLine($"Insertando movimiento: {movimiento.Monto} para el empleado {valorDocumentoIdentidad}");
-            foreach (var error in ModelState.Values.SelectMany(v => v.Errors))
-            {
-                Console.WriteLine("Error en ModelState: " + error.ErrorMessage);
-            }
-
             if (ModelState.IsValid)
             {
                 try

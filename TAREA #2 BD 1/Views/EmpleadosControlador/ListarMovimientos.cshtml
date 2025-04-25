@@ -1,8 +1,21 @@
 ﻿@model TAREA__2_BD_1.Models.DetalleMovimientos
 
-<div class="container">
-    <h2>Movimientos del Empleado</h2>
+@{
+    ViewData["Title"] = "Movimientos del Empleado";
+}
 
+<h2>@ViewData["Title"]</h2>
+@if (ViewData.ModelState[""]?.Errors.Count > 0)
+{
+    <div class="alert alert-danger">
+        @foreach (var error in ViewData.ModelState[""].Errors)
+        {
+            <p>@error.ErrorMessage</p>
+        }
+    </div>
+}
+
+<div class="container">
     <div class="card mb-3">
         <div class="card-body">
             <h5 class="card-title">Información del Empleado</h5>

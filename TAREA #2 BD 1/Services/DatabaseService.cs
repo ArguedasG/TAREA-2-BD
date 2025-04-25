@@ -452,12 +452,6 @@ namespace TAREA__2_BD_1.Services
 
         public async Task<int> InsertarMovimientoAsync(string valorDocumentoIdentidad, int idTipoMovimiento, decimal monto, int idUsuario)
         {
-            // Escribir valores para debug
-            Console.WriteLine($"ValorDocumentoIdentidad: {valorDocumentoIdentidad}");
-            Console.WriteLine($"IdTipoMovimiento: {idTipoMovimiento}");
-            Console.WriteLine($"Monto: {monto}");
-            Console.WriteLine($"IdUsuario: {idUsuario}");
-
             try
             {
                 using (var connection = new SqlConnection(_connectionString))
