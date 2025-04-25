@@ -452,6 +452,12 @@ namespace TAREA__2_BD_1.Services
 
         public async Task<int> InsertarMovimientoAsync(string valorDocumentoIdentidad, int idTipoMovimiento, decimal monto, int idUsuario)
         {
+            // Escribir valores para debug
+            Console.WriteLine($"ValorDocumentoIdentidad: {valorDocumentoIdentidad}");
+            Console.WriteLine($"IdTipoMovimiento: {idTipoMovimiento}");
+            Console.WriteLine($"Monto: {monto}");
+            Console.WriteLine($"IdUsuario: {idUsuario}");
+
             try
             {
                 using (var connection = new SqlConnection(_connectionString))
@@ -492,6 +498,7 @@ namespace TAREA__2_BD_1.Services
                             throw new Exception($"Error en sp_InsertarMovimiento. Código de error: {codigoError}");
                         }
 
+                        Console.WriteLine($"Movimiento insertado. Código de error: {codigoError}");
                         return codigoError;
                     }
                 }
@@ -540,18 +547,6 @@ namespace TAREA__2_BD_1.Services
                         Direction = ParameterDirection.Output
                     };
                     command.Parameters.Add(codigoErrorParam);
-
-                    string myIP = "";
-                    var host = Dns.GetHostEntry(Dns.GetHostName());
-                    foreach (var ip in host.AddressList)
-                    {
-                        if (ip.AddressFamily == AddressFamily.InterNetwork)
-                        {
-                            myIP = ip.ToString();
-                            break;
-                        }
-                    }
-                    command.Parameters.AddWithValue("@inPostInIP", myIP);
 
                     using (var reader = await command.ExecuteReaderAsync())
                     {

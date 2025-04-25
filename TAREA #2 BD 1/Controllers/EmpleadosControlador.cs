@@ -266,22 +266,10 @@ namespace TAREA__2_BD_1.Controllers
                 // Obtener los tipos de movimiento desde la base de datos
                 var tiposMovimiento = await _databaseService.ObtenerTiposMovimientoAsync(idUsuario);
 
-                // Crear el modelo inicial
-                var modelo = new Movimiento
-                {
-                    FechaMovimiento = DateTime.Now, // Fecha actual por defecto
-                    Monto = 0,
-                    NombreTipoMovimiento = "", // Se seleccionará en el formulario
-                    NuevoSaldo = 0,
-                    NombreUsuario = "",
-                    IP = "",
-                    FechaHoraRegistro = DateTime.Now
-                };
-
                 ViewBag.TiposMovimiento = tiposMovimiento ?? new List<TipoMovimiento>();
                 ViewBag.ValorDocumentoIdentidad = valorDocumentoIdentidad;
 
-                return View(modelo);
+                return View(new Movimiento());
             }
             catch (Exception ex)
             {
@@ -296,12 +284,16 @@ namespace TAREA__2_BD_1.Controllers
         public async Task<IActionResult> InsertarMovimiento(Movimiento movimiento, string valorDocumentoIdentidad)
         {
             int idUsuario = HttpContext.Session.GetInt32("idUsuario") ?? 0;
+            Console.WriteLine($"Insertando movimiento: {movimiento.Monto} para el empleado {valorDocumentoIdentidad}");
+            foreach (var error in ModelState.Values.SelectMany(v => v.Errors))
+            {
+                Console.WriteLine("Error en ModelState: " + error.ErrorMessage);
+            }
 
             if (ModelState.IsValid)
             {
                 try
                 {
-                    // Llamar al servicio para insertar el movimiento
                     var codigoError = await _databaseService.InsertarMovimientoAsync(
                         valorDocumentoIdentidad,
                         movimiento.IdTipoMovimiento, // Usar el ID del tipo de movimiento
